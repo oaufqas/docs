@@ -1,0 +1,49 @@
+**GitLab** — это комплексная DevSecOps-платформа, построенная вокруг Git, которая объединяет управление репозиториями, CI/CD-конвейеры (автоматизация сборки/тестирования), трекер задач (issues) и Wiki. Ключевые компоненты: репозитории, ветки, Merge Requests для ревью кода, раннеры (runners) для выполнения задач и пайплайны. 
+
+### Основные понятия GitLab:
+Git-репозиторий: Центральное хранилище кода, доступное через веб-интерфейс.
+Ветки (Branches): Независимые линии разработки, позволяющие вести работу над фичами без влияния на основной код.
+Merge Request (MR): Запрос на слияние изменений из ветки в основную, предназначенный для Code Review и обсуждения.
+CI/CD Пайплайн (Pipeline): Автоматизированный конвейер, включающий стадии (stages) и задачи (jobs): сборка, тестирование, деплой.
+Runner: Приложение, которое выполняет задачи (jobs), описанные в файле .gitlab-ci.yml.
+Issues: Трекер для отслеживания ошибок и планирования задач.
+Роли пользователей: Ограничивают права доступа (Guest, Reporter, Developer, Maintainer, Owner). 
+
+# GitLab поддерживает работу как в облаке (SaaS), так и на собственных серверах (self-hosted)
+
+Для работы локальной версии gitlab, потребуется производительный сервер (4-6 gb memory, ~3 cpu),
+установка на этот сервер gitlab, и отдельно к ней раннеры, которые будут исполнять ci-cd скрипты
+
+
+
+
+
+
+### ------------------------ installation gitlab -------------------------
+
+```bash
+curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
+
+*1 variant* 
+sudo apt install gitlab-ce
+
+# Редактируем конфиг и меняем external_url на IP или домен твоей машины
+sudo nano /etc/gitlab/gitlab.rb 
+# Пример: external_url 'http://192.168.1.100'
+
+sudo gitlab-ctl reconfigure
+
+*2 variant* 
+
+sudo EXTERNAL_URL="http://host" apt-get install gitlab-ce
+```
+# url local gitlab: http://host:80
+# username: root
+# password: /etc/gitlab/initial_root_password
+
+
+остановить/запустить все процессы gitlab
+sudo gitlab-ctl stop/start
+
+
+Установка раннера в ./runners.md

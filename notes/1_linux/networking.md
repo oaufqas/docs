@@ -14,7 +14,7 @@
 | nc	     | Сетевой Swiss Army Knife	  | nc -zv host port               |
 | iptables	 | Файрвол	                  | iptables -L -n                 |
 | ufw	     | Простой файрвол	          | ufw status                     |
-
+| arp        | Просмотр ARP-таблицы       | arp -a      arp -scan          |
 
 ### SSH:
 

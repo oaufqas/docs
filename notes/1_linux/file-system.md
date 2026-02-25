@@ -17,9 +17,12 @@
 
 tar -czf archive.tar.gz dir/     # Создать tar.gz
 tar -xzf archive.tar.gz          # Распаковать tar.gz
+
 tar -cjf archive.tar.bz2 dir/    # Создать tar.bz2
 tar -xjf archive.tar.bz2          # Распаковать tar.bz2
+
 zip -r archive.zip dir/          # Создать zip
 unzip archive.zip                # Распаковать zip
+
 gzip file                        # Сжать файл
 gunzip file.gz                   # Распаковать gz

@@ -25,9 +25,12 @@
 | whoami   | Текущий пользователь | whoami
 | id	   | ID пользователя	  | id
 | useradd  | Создать пользователя | useradd -m -s /bin/bash user
-| usermod  | Изменить пользователя| usermod -aG docker user
+| usermod  | Изменить пользователя| usermod -aG docker user (Добавляет в группу)
 | userdel  | Удалить пользователя | userdel -r user (с домашней папкой)
 | passwd   | Сменить пароль	      | passwd user
 | groupadd | Создать группу	      | groupadd docker
 | groups   | Группы пользователя  | groups user
 | sudo	   | Выполнить от root	  | sudo command
+
+
+cat /etc/group - Вывести все группы
