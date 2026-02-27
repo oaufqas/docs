@@ -32,3 +32,4 @@ dnf install pkg_name – Устанавливает пакет с помощью
 
 dpkg -i pkg_name – Установка из deb-пакета (Debian, Ubuntu, Mint…)
 dpkg -r pkg_name – Удаляет deb-пакет (Debian, Ubuntu, Mint…)
+```
