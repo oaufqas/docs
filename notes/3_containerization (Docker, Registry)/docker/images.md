@@ -16,7 +16,10 @@ docker image **prune** -a - Удаляет все неиспользуемые (
 
 docker **build -f Dockerfile.prod** -t my-app:prod . - Собрать с другим Dockerfile
 docker **build --no-cache** -t my-app:latest . - Собрать без кэша
-
+docker **cp my-container:/app/logs/app.log ./app.log** Скопировать файл из контейнера на хост
+docker **cp config.json my-container:/app/config.json** Скопировать файл с хоста в контейнер
+docker **save -o my-app.tar my-app:latest** Сохранить образ в файл
+docker **load -i my-app.tar** Загрузить образ из файла
 
 
 
