@@ -22,6 +22,7 @@
 
 **Примеры:**
 - `chmod 755` = rwxr-xr-x (владелец всё, остальные чтение/выполнение)
+- `chmod -R 755 <dir>` = rwxr-xr-x (Меняет права доступа всех дочерних директорий и файлов)
 - `chmod 644` = rw-r--r-- (владелец чтение/запись, остальные только чтение)
 - `chown newuser newfile` – Меняет владельца newfile на newuser
 - `chown newuser:newgroup newfile` – Изменяет владельца и группу-владельца для newfile на newuser и newgroup

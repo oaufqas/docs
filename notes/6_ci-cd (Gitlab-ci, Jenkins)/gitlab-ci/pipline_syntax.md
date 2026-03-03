@@ -56,109 +56,6 @@ test_job:
 
 
 
-## Jobs — определение задач
-Job’ы — это основа всей конфигурации CI/CD. Каждый job описывает конкретную задачу, которую должен выполнить runner. Для job’а можно определить:
-- Что выполнять (script). (обязательно!)
-- На каком этапе (stage).
-- На каком runner’е (tags).
-- В каком окружении (image).
-- Какие переменные использовать.
-- Какие артефакты сохранить.
-- Зависимости от других job’ов и многое другое.
-
-```yml
-stages:
-  - build
-  - test
-
-build_app:
-  stage: build
-  image: node:18
-  script:
-    - npm install
-    - npm run build
-  artifacts:
-    paths:
-      - dist/    # build_app сохраняет результат сборки (dist/) как артефакт.
-    expire_in: 1 day
-
-run_tests:
-  stage: test
-  image: node:18
-  script:
-    - npm install
-    - npm run test
-  needs:
-    - build_app  # Ждём выполнения build_app и получаем его артефакты:
-                 # job не ждёт завершения всего stage build, а стартует сразу после build_app. Артефакты build_app будут автоматически доступны.
-```
-
-
-
-
-# Дополнительные параметры для job'ов
-
-```yml
-build_frontend:
-  name: "Build Frontend Application" # С помощью name можно задать более понятное отображаемое название
-  stage: build
-  script:
-    - npm run build
-
-long_running_tests:
-  stage: test
-  timeout: 2h # timeout — максимальное время выполнения job’а (30s. 15m. 1h. 2h 30m.)
-  script:
-    - pytest --slow-tests
-
-flaky_tests:
-  stage: test
-  retry:   # retry — автоматические повторы при ошибке. В примере повторяет до 2 раз, если упадёт
-    max: 2
-    when:  # Когда повторять
-      - runner_system_failure
-      - stuck_or_timeout_failure
-  script:
-    - npm test
-
-
-tolerant_job: # Иногда ошибка допустима (например, необязательные тесты). Тогда можно явно сказать shell’у «игнорируй ошибку»:
-  script:
-    - npm test || true  # Даже если тесты упадут, job продолжит работу
-  allow_failure: true # Альтернатива
-
-
-build_job:
-  stage: build
-  variables: # Параметр variables позволяет задать переменные окружения только для конкретного job’а. Используются через $VAR или ${VAR}
-    NODE_ENV: "production"
-    LOG_LEVEL: "debug"
-    CUSTOM_VAR: "some value"
-  script:
-    - echo $NODE_ENV      # Выведет: production
-    - echo $LOG_LEVEL     # Выведет: debug
-
-deploy_to_staging:
-  stage: deploy
-  environment: # Параметр environment связывает job с логическим окружением (staging, production и т. п.)
-    name: staging
-    url: https://staging.example.com
-  script:
-    - ./deploy-to-staging.sh
-
-test_with_coverage:
-  stage: test
-  script:
-    - pytest --cov=src --cov-report=term --cov-report=xml
-  coverage: '/TOTAL.*\s+(\d+%)$/'  # Regex для извлечения % покрытия. GitLab может автоматически его извлечь и показать в интерфейсе.
-```
-
-
-
-
-
-
-
 ## Workflow — условия запуска pipeline
 Секция workflow отвечает за самое первое решение: нужно ли вообще создавать pipeline.
 Это уровень выше, чем условия у отдельных job’ов — если pipeline не создан, никакие job’ы даже не будут рассмотрены.
@@ -337,3 +234,137 @@ package_app:
 Используйте artifacts для передачи результатов, а не для кэша.
 Используйте needs, если хотите ускорить pipeline, но не переусердствуйте — слишком сложный DAG сложнее поддерживать.
 Если job использует артефакты другого job’а — явно указывайте needs, даже если они находятся в соседних стадиях.
+
+
+
+
+
+
+
+
+
+# Services - вспомогательные контейнеры
+Иногда для выполнения job’а одного контейнера недостаточно. Например, для тестов может понадобиться база данных, Redis, RabbitMQ или другой внешний сервис.
+В GitLab CI для этого есть services — **дополнительные Docker-контейнеры, которые запускаются рядом с основным job’ом.**
+
+```yml
+test_with_db:
+  stage: test
+  image: python:3.11
+  services:
+    - postgres:17 # <- Сервис-зависимость база данных
+    - redis:7 # <- Сервис-зависимость redis
+  variables: 
+    POSTGRES_DB: test_db 
+    POSTGRES_USER: test_user
+    POSTGRES_PASSWORD: test_password
+    DATABASE_URL: "postgresql://test_user:test_password@postgres:5432/test_db"
+    REDIS_URL: "redis://redis:6379"
+  script:
+    - pip install -r requirements.txt
+    - pytest
+```
+
+Обращение к сервисам происходит:
+- К PostgreSQL — по хосту postgres.
+- К Redis — по хосту redis.
+
+Алиасы сервисов
+Иногда удобнее использовать более осмысленные имена. Для этого можно задать alias:
+```yml
+  services:
+    - name: postgres:17
+      alias: db # <- Теперь база доступна по хосту db, а не postgres
+```
+
+
+
+
+## Готовность сервиса — важный нюанс
+Сервисы не гарантированно готовы к моменту старта script. Частая ошибка новичков — сразу подключаться к БД и ловить connection refused.
+GitLab не ждёт, пока сервис полностью поднимется.
+
+# Обычно используют один из подходов:
+- retry-логику в коде.
+- sleep (не лучший вариант).
+- Утилиты ожидания (wait-for-it, pg_isready, nc и т.п.).
+
+# Когда стоит использовать services:
+- unit и integration-тестов.
+- Локальных БД для CI.
+- Проверки миграций.
+- Временных очередей и кэшей.
+
+# Не стоит использовать их для:
+- production-нагрузок.
+- Долгоживущих окружений.
+- Сложных multi-container сценариев (для этого лучше Docker Compose или Kubernetes).
+
+
+
+
+
+# before_script:
+- Установка зависимостей.
+- Подготовка окружения.
+- Логин в registry.
+- Проверка доступности сервисов.
+
+
+# after_script:
+- Очистка временных файлов.
+- Логирование.
+- Отладочная информация.
+- Уведомления.
+
+
+```yml
+build_job:
+  stage: build
+  before_script:
+    - echo "Preparing environment..."
+    - npm install
+  script:
+    - npm run build
+  after_script:
+    - echo "Cleaning up..."
+    - rm -rf node_modules
+```
+
+
+
+
+# Матрица параллельных job’ов (parallel: matrix)
+Матрицы позволяют запускать один job с разными комбинациями переменных.
+
+```yml
+test_matrix:
+  stage: test
+  image: python:3.9
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ["3.8", "3.9", "3.10", "3.11"]
+        DJANGO_VERSION: ["3.2", "4.0"]
+  script:
+    - echo "Testing Python $PYTHON_VERSION with Django $DJANGO_VERSION"
+    - pip install django==$DJANGO_VERSION
+    - pytest
+```
+
+
+# Что произойдёт:
+- GitLab создаст 8 отдельных job’ов (4 × 2).
+- Каждый job получит свою комбинацию переменных.
+- В UI они будут отображаться как отдельные задания.
+
+# Это особенно удобно для:
+- Тестирования на нескольких версиях языка.
+- Проверки совместимости библиотек.
+- Кросс-платформенных сборок.
+
+# Важные ограничения матриц:
+- Количество job’ов в матрице ограничено (зависит от версии GitLab).
+- Большое количество комбинаций может резко увеличить время pipeline’а.
+- Каждый job — это отдельный контейнер со своими ресурсами.
+
+Поэтому матрицы стоит использовать осознанно и не превращать pipeline в «взрыв job’ов».

@@ -89,6 +89,8 @@ ls -l                   # Видно куда указывает
 
 ### Сжатие файлов:
 
+tar -cf archive.tar dir/     # Создать tar
+tar -xf archive.tar          # Распаковать tar
 
 tar -czf archive.tar.gz dir/     # Создать tar.gz
 tar -xzf archive.tar.gz          # Распаковать tar.gz
