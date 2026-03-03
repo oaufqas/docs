@@ -1,0 +1,220 @@
+{
+  "main": {
+    "id": "d3efa4b2dd7e419c",
+    "type": "split",
+    "children": [
+      {
+        "id": "06825cd8ee02fde5",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "68273e812a59dea9",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "notes/2_networks/nftables.md",
+                "mode": "preview",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "nftables"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "95bb5d49d88422f2",
+    "type": "split",
+    "children": [
+      {
+        "id": "23d5b2e2e96777d0",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "97a38e31c072c182",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Файловый менеджер"
+            }
+          },
+          {
+            "id": "865d92aec86758ad",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Поиск"
+            }
+          },
+          {
+            "id": "64b73ed14ec5f12e",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Закладки"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "a91bcb6f73bfb764",
+    "type": "split",
+    "children": [
+      {
+        "id": "7d398b2b2b685cca",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "9098c60e2068e078",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "notes/2_networks/nftables.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Обратные ссылки для nftables"
+            }
+          },
+          {
+            "id": "752fed0b04085dd2",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "notes/2_networks/nftables.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Исходящие ссылки из nftables"
+            }
+          },
+          {
+            "id": "3ba2b2fcdf5a9047",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Теги"
+            }
+          },
+          {
+            "id": "b02a7b57ac9cfe41",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Все свойства"
+            }
+          },
+          {
+            "id": "99c36cbf6bc0a3a8",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "notes/2_networks/nftables.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Структура nftables"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Меню быстрого перехода": false,
+      "graph:Граф": false,
+      "canvas:Создать новый холст": false,
+      "daily-notes:Сегодняшняя заметка": false,
+      "templates:Вставить шаблон": false,
+      "command-palette:Открыть палитру команд": false,
+      "bases:Создать новую базу": false
+    }
+  },
+  "active": "68273e812a59dea9",
+  "lastOpenFiles": [
+    "notes/2_networks/network-troubleshooting.md",
+    "notes/2_networks/network-reference-models.md",
+    "notes/2_networks/navigation.md",
+    "notes/6_ci-cd/gitlab-ci/examples-pipeline/ssh.gitlab-ci.yml.md",
+    "notes/6_ci-cd/gitlab-ci/examples-pipeline/first_pipline.gitlab-ci.yml.md",
+    "notes/6_ci-cd/gitlab-ci/examples-pipeline/base-ci.gitlab-ci.yml.md",
+    "notes/6_ci-cd/gitlab-ci/variables.md",
+    "notes/6_ci-cd/gitlab-ci/runners.md",
+    "notes/6_ci-cd/gitlab-ci/pipline_syntax.md",
+    "notes/6_ci-cd/gitlab-ci/jobs.md",
+    "notes/6_ci-cd/gitlab-ci/cache-artefacts.md",
+    "notes/6_ci-cd/navigation.md",
+    "notes/6_ci-cd/gitlab-ci/basics_gitlab.md",
+    "README.md",
+    "notes/3_containerization/navigation.md",
+    "notes/6_ci-cd/1_teory.md",
+    "templates/nginx/nginx.ssl.conf.md",
+    "templates/nginx/nginx.conf.md",
+    "templates/docker/Dockerfile.python.md",
+    "templates/docker/Dockerfile.node.md",
+    "templates/docker/Dockerfile.multistage.md",
+    "templates/docker/docker-compose.yml.md",
+    "notes/3_containerization/registry/private-registry.md",
+    "notes/3_containerization/registry/dockerhub.md",
+    "notes/3_containerization/docker/volumes.md",
+    "notes/3_containerization/docker/security.md",
+    "Теория Linux([[notes/1_linux",
+    "Теория Linux([[notes",
+    "[[notes/1_linux",
+    "[[notes",
+    "Без названия.canvas"
+  ]
+}

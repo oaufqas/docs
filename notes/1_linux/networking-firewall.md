@@ -18,7 +18,7 @@
 ### SSH:
 
 scp ./id_...pub rvlx@192.168.0.103:/~/.ssh/authorized_keys
-ssh-copy-id user@ip
+ssh-copy-id -i ~/.ssh/id_ed25519.pub user@host
 ssh-keygen -t ed25519
 
 ssh user@host                    # Подключиться

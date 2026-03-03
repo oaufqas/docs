@@ -1,3 +1,4 @@
+```yml
 stages:
   - deploy
 
@@ -45,3 +46,4 @@ deploy:
     - docker compose up -d --build
   only:
     - master
+```

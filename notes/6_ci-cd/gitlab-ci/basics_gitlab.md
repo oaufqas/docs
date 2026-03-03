@@ -20,16 +20,17 @@ sudo gitlab-ctl reconfigure
 
 sudo EXTERNAL_URL="http://host" apt-get install gitlab-ce
 ```
-# url local gitlab: http://host:80
-# username: root
-# password: /etc/gitlab/initial_root_password
+###### Url local gitlab: http://host:80
+###### Username: root
+###### Password: /etc/gitlab/initial_root_password
 
 
-остановить/запустить все процессы gitlab
+Остановить/запустить все процессы gitlab
+```bash
 sudo gitlab-ctl stop/start
+```
 
-
-Установка раннера в ./runners.md
+Установка раннера в [[runners]]
 
 
 

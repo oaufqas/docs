@@ -1,12 +1,11 @@
 # Чтобы работать с реестром, нужно понимать формат тегов: registry_url/repository_name:tag.
 
-Команда	        Описание
+```
 docker login - Авторизация в реестре (нужна для приватных репозиториев или пуша).
 docker tag [image] [user]/[repo]:[tag] - Подготовка образа (переименование) для отправки в конкретный репозиторий.
 docker push [user]/[repo]:[tag] - Загрузка вашего образа в облако.
 docker logout - Выход из учетной записи реестра.
-
-
+```
 
 ### Self-hosted (Свой собственный реестр)
 
@@ -89,12 +88,15 @@ http {
 
 mkdir -p ./registry/data
 
-# Устанавливаем htpasswd.
+### Устанавливаем htpasswd.
+```
 sudo apt install apache2-utils
-
-# Создаём файл password. Имя пользователя: busy, пароль: bee.
+```
+### Создаём файл password. Имя пользователя: busy, пароль: bee.
+```
 htpasswd -Bbn busy bee > ./registry/registry.password
 
 docker-compose up
 
 Теперь вы сможете пушить образы на свой сервер
+```
