@@ -32,16 +32,16 @@ FHS (Filesystem Hierarchy Standard)
 
 ## Типы файлов в Linux
 
-    Тип	                  Обозначение      Пример
-Обычный файл	          -              -rw-r--r--
-Директория                d              drwxr-xr-x
-Символическая ссылка	  l              lrwxrwxrwx
-Устройство (блочное)	  b              brw-rw----
-Устройство (символьное)   c              crw-rw----
-Сокет	                  s              srwxrwxrwx
-Pipe (FIFO)	              p              prw-r--r--
 
-
+| Тип                     | Обозначение | Пример     |
+| ----------------------- | :---------: | ---------- |
+| Обычный файл            |      -      | -rw-r--r-- |
+| Директория              |      d      | drwxr-xr-x |
+| Символическая ссылка    |      l      | lrwxrwxrwx |
+| Устройство (блочное)    |      b      | brw-rw---- |
+| Устройство (символьное) |      c      | crw-rw---- |
+| Сокет                   |      s      | srwxrwxrwx |
+| Pipe (FIFO)             |      p      | prw-r--r-- |
 
 
 ## inode (Index Node)
@@ -55,17 +55,17 @@ Pipe (FIFO)	              p              prw-r--r--
 - Количество ссылок
 - Указатели на блоки данных
 
-ls -i file              # Показать inode файла
-stat file               # Детальная информация о файле
-df -i                   # Информация об inode на ФС
+`ls -i file`              # Показать inode файла
+`stat file`               # Детальная информация о файле
+`df -i`                   # Информация об inode на ФС
 
 # Жесткая ссылка (один inode, два имени)
-ln target link_name
-ls -li                  # Одинаковый inode
+`ln target link_name`
+`ls -li`                  # Одинаковый inode
 
 # Символическая ссылка (отдельный файл, указывает на путь)
-ln -s target symlink_name
-ls -l                   # Видно куда указывает
+`ln -s target symlink_name`
+`ls -l`                   # Видно куда указывает
 
 Различия:
 
@@ -73,33 +73,34 @@ ls -l                   # Видно куда указывает
 Символическая - можно на всё, если удалить оригинал - ссылка сломается
 
 
-| Команда |	Описание                | Пример
-|---------|-------------------------|--------------------------
-| df	  | Использование дисков    | df -h (человекочитаемый)
-| du	  | Размер директорий	    | du -sh * (суммарно)
-| mount	  | Монтирование	        | mount /dev/sda1 /mnt
-| umount  | Размонтирование	        | umount /mnt
-| fdisk	  | Работа с разделами      | fdisk -l (список)
-| lsblk	  | Список блочных устройств| lsblk
-| blkid	  | UUID устройств	        | blkid
-| fsck    | Проверка ФС	            | fsck /dev/sda1
-| sync	  | Сброс кэша на диск	    | sync
+| Команда | Описание                 | Пример                   |
+| ------- | ------------------------ | ------------------------ |
+| df      | Использование дисков     | df -h (человекочитаемый) |
+| du      | Размер директорий        | du -sh * (суммарно)      |
+| mount   | Монтирование             | mount /dev/sda1 /mnt     |
+| umount  | Размонтирование          | umount /mnt              |
+| fdisk   | Работа с разделами       | fdisk -l (список)        |
+| lsblk   | Список блочных устройств | lsblk                    |
+| blkid   | UUID устройств           | blkid                    |
+| fsck    | Проверка ФС              | fsck /dev/sda1           |
+| sync    | Сброс кэша на диск       | sync                     |
+
 
 
 
 ### Сжатие файлов:
 
-tar -cf archive.tar dir/     # Создать tar
-tar -xf archive.tar          # Распаковать tar
+`tar -cf archive.tar dir/`     # Создать tar
+`tar -xf archive.tar`          # Распаковать tar
 
-tar -czf archive.tar.gz dir/     # Создать tar.gz
-tar -xzf archive.tar.gz          # Распаковать tar.gz
+`tar -czf archive.tar.gz dir/`     # Создать tar.gz
+`tar -xzf archive.tar.gz`          # Распаковать tar.gz
 
-tar -cjf archive.tar.bz2 dir/    # Создать tar.bz2
-tar -xjf archive.tar.bz2          # Распаковать tar.bz2
+`tar -cjf archive.tar.bz2 dir/`    # Создать tar.bz2
+`tar -xjf archive.tar.bz2`          # Распаковать tar.bz2
 
-zip -r archive.zip dir/          # Создать zip
-unzip archive.zip                # Распаковать zip
+`zip -r archive.zip dir/`          # Создать zip
+`unzip archive.zip`                # Распаковать zip
 
-gzip file                        # Сжать файл
-gunzip file.gz                   # Распаковать gz
+`gzip file`                        # Сжать файл
+`gunzip file.gz`                   # Распаковать gz

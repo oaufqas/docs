@@ -31,5 +31,6 @@
 
 
 cat /etc/group - Вывести все группы
+cat /etc/passwd - Вывести всех пользователей
 
 Менять разрешения на использование sudo: etc/sudoers или sudo visudo

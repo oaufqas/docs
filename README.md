@@ -7,7 +7,7 @@ My personal DevOps knowledge base. It contains notes, cheat sheets, and useful r
 - [Web-servers (Nginx, Apache, Haproxy)](./notes/4_web-servers)
 - [Data bases (sql, nosql)](./notes/5_databases)
 - [CI/CD (Gitlab-ci, Jenkins)](./notes/6_ci-cd/navigation)
-- [Configuration (Ansible, Saltstack)](./notes/7_configuration)
+- [Configuration (Ansible, Saltstack)](./notes/7_configuration/ansible/basics)
 - [Orchestration (K8s, Swarm)](./notes/8_orchestration)
 - [Virtualization (Proxmbox, Kvm, Vagrant)](./notes/9_virtualization)
 - [Monitoring (Prometheus, Grafana, Victoriametrics, Zabbix, Logging)](./notes/10_monitoring)
