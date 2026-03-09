@@ -72,6 +72,7 @@
 ### Основные директивы (Ключевые элементы):
 
 - **hosts** - Кого настраиваем
+
 ```yml
 - hosts: all                    # Все серверы из инвентаря
 - hosts: webservers             # Только группа webservers
@@ -79,7 +80,10 @@
 - hosts: 192.168.1.10           # Конкретный IP
 - hosts: webservers:databases   # Несколько групп
 ```
+
+
 - **name** - Описание задачи
+
 ```yml
 tasks:
   - name: Установить nginx на веб-сервер
@@ -92,7 +96,10 @@ tasks:
       src: app.conf
       dest: /etc/app/
 ```
+
+
 - **vars** - Переменные
+
 ```yml
 - hosts: all
   vars:
@@ -112,7 +119,10 @@ tasks:
         name: "{{ packages }}"
         state: present
 ```
+
+
 - **vars_files** - Переменные из файлов
+
 ```yml
 - hosts: all
   vars_files:
@@ -123,7 +133,10 @@ tasks:
       debug:
         msg: "DB host: {{ database_host }}"
 ```
+
+
 - **become** - Повышение привилегий
+
 ```yml
 - hosts: all
   become: yes                # Все задачи от root
@@ -149,6 +162,7 @@ tasks:
 
 
 - **when** - Условное выполнение
+
 ```yml
 tasks:
   - name: Установить только на Debian
@@ -173,7 +187,10 @@ tasks:
       - ansible_distribution_version == "20.04"
       - force_upgrade | default(False)
 ```
+
+
 - **register** - Сохранение результата
+
 ```yml
 tasks:
   - name: Выполнить команду
@@ -197,7 +214,10 @@ tasks:
     debug:
       msg: "API статус: {{ api_result.json.status }}"
 ```
+
+
 - **ignore_errors** - Игнорирование ошибок
+
 ```yml
 tasks:
   - name: Попробовать удалить (если нет - не страшно)
@@ -209,7 +229,10 @@ tasks:
   - name: Выполнить даже если предыдущее упало
     command: echo "Все равно выполнится"
 ```
+
+
 - **failed_when** - Свои условия ошибки
+
 ```yml
 tasks:
   - name: Проверить лог
@@ -219,7 +242,10 @@ tasks:
       - grep_result.rc == 0  # Если найдена ошибка - считаем job проваленным
       - '"CRITICAL" in grep_result.stdout'
 ```
+
+
 - **changed_when** - Свои условия изменений
+
 ```yml
 tasks:
   - name: Запустить скрипт
@@ -234,6 +260,7 @@ tasks:
 
 
 - **loop** - Перебор списка (**with_items** - старый синтаксис)
+
 ```yml
 tasks:
   - name: Установить несколько пакетов
@@ -255,7 +282,10 @@ tasks:
       - { name: 'bob', groups: 'sudo' }
       - { name: 'charlie', groups: 'docker' }
 ```
+
+
 - **with_dict** - Перебор словаря
+
 ```yml
 tasks:
   - name: Создать пользователей из словаря
@@ -277,6 +307,7 @@ tasks:
 
 
 - **vars_prompt** - Запрос ввода
+
 ```yml
 - hosts: all
   vars_prompt:
@@ -290,7 +321,10 @@ tasks:
       debug:
         msg: "Пароль: {{ database_password }}"
 ```
+
+
 - **set_fact** - Создание переменных
+
 ```yml
 tasks:
   - name: Получить дату
@@ -313,6 +347,7 @@ tasks:
 
 
 - **handlers** - Задачи по уведомлению
+
 ```yml
 tasks:
   - name: Изменить конфиг nginx
@@ -344,6 +379,7 @@ handlers:
 
 
 - **include_tasks** / **import_tasks** - Подключение файла задач
+
 ```yml
 tasks:
   - name: Включить файл с задачами
@@ -353,7 +389,10 @@ tasks:
     import_tasks: configure-app.yml
     when: env == "production"
 ```
+
+
 - include_vars - Подключение переменных
+
 ```yml
 tasks:
   - name: Загрузить переменные для окружения
@@ -372,6 +411,7 @@ tasks:
 
 
 - **roles** - Использование ролей
+
 ```yml
 - hosts: webservers
   roles:
@@ -383,7 +423,10 @@ tasks:
     - role: postgresql
       when: install_db | default(False)
 ```
+
+
 - **apply** - Применить роли с условиями
+
 ```yml
 - hosts: app
   tasks:
@@ -398,6 +441,7 @@ tasks:
 
 
 - **tags** - Маркировка задач
+
 ```yml
 tasks:
   - name: Установить пакеты
@@ -429,6 +473,7 @@ tasks:
 
 
 - **block** - Группировка задач
+
 ```yml
 tasks:
   - name: Блок установки и настройки
@@ -450,7 +495,10 @@ tasks:
     become: yes
     ignore_errors: yes
 ```
+
+
 - **rescue** и **always** (как try/catch)
+
 ```yml
 tasks:
   - block:

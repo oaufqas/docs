@@ -29,8 +29,10 @@
 - `chown -R newuser:newgroup newfolder` – Меняет владельца и группу-владельца каталога newfolder на newuser и newgroup
 - `stat -c “%U %G” newfile` – отображает владельцев пользователей и групп newfile
 
+```bash
+sudo echo "<username> ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers - права sudo без пароля
 
 cat /etc/group - Вывести все группы
 cat /etc/passwd - Вывести всех пользователей
-
+```
 Менять разрешения на использование sudo: etc/sudoers или sudo visudo

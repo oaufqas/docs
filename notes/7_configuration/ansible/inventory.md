@@ -48,3 +48,26 @@ all:
  -  `ansible_ssh_pass`,  `ansible_password`: password
  -  `ansible_ssh_private_key_file`: path/to/file
  -  `ansible_python_interpreter`: path/to/file
+
+
+### Групповые переменные можно выносить в отдельные файлы:
+
+```
+group_vars - директория в коре проекта с файлами(названиями групп из inventory)
+```
+
+Например:
+
+```bash 
+cat hosts.ini 
+
+[servers]
+webs1 ansible_host=ansiblecontroller1
+; webs2 ansible_host=ansiblecontroller2
+
+cat ./group_vars/servers 
+ansible_python_interpreter: /usr/bin/python3 # Ключ-значение через двоеточие
+ansible_ssh_private_key_file: ~/.ssh/id_rsa
+ansible_user: ansiblex
+ansible_sudo_pass: KljdValR2
+```
