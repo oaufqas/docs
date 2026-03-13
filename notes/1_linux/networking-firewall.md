@@ -1,26 +1,27 @@
-| Команда    | Описание                   | Пример                        |
-| ---------- | -------------------------- | ----------------------------- |
-| ip         | Настройка сети             | ip addr show (IP адреса)      |
-| ifconfig   | Устаревшая                 | ifconfig -a                   |
-| ping       | Проверка доступности       | ping -c 4 google.com          |
-| netstat    | Сетевые соединения         | netstat -tulpn                |
-| ss         | Современная замена netstat | ss -tulpn                     |
-| curl       | HTTP запросы               | curl -I http://example.com    |
-| wget       | Скачивание                 | wget https://example.com/file |
-| traceroute | Маршрут                    | traceroute google.com         |
-| nslookup   | DNS запросы                | nslookup google.com           |
-| dig        | Расширенный DNS            | dig google.com                |
-| nc         | Сетевой Swiss Army Knife   | nc -zv host port              |
-| iptables   | Файрвол                    | iptables -L -n                |
-| ufw        | Простой файрвол            | ufw status                    |
-| arp        | Просмотр ARP-таблицы       | arp -a      arp -scan         |
+| Команда      | Описание                   | Пример                          |
+| ------------ | -------------------------- | ------------------------------- |
+| `ip`         | Настройка сети             | `ip addr show (IP адреса)`      |
+| `ifconfig`   | Устаревшая                 | `ifconfig -a`                   |
+| `ping`       | Проверка доступности       | `ping -c 4 google.com`          |
+| `netstat`    | Сетевые соединения         | `netstat -tulpn`                |
+| `ss`         | Современная замена netstat | `ss -tulpn`                     |
+| `curl`       | HTTP запросы               | `curl -I http://example.com`    |
+| `wget`       | Скачивание                 | `wget https://example.com/file` |
+| `traceroute` | Маршрут                    | `traceroute google.com`         |
+| `nslookup`   | DNS запросы                | `nslookup google.com`           |
+| `dig`        | Расширенный DNS            | `dig google.com`                |
+| `nc`         | Сетевой Swiss Army Knife   | `nc -zv host port`              |
+| `iptables`   | Файрвол                    | `iptables -L -n`                |
+| `ufw`        | Простой файрвол            | `ufw status`                    |
+| `arp`        | Просмотр ARP-таблицы       | `arp -a      arp -scan`         |
 
 ### SSH:
 
 ```bash
-scp ./id_...pub rvlx@192.168.0.103:/~/.ssh/authorized_keys
+ssh-keygen -t ed25519    # Создание ключей
+
+scp ./id_...pub rvlx@192.168.0.103:~/.ssh/authorized_keys
 ssh-copy-id -i ~/.ssh/id_ed25519.pub user@host
-ssh-keygen -t ed25519
 
 ssh user@host                    # Подключиться
 ssh -p 2222 user@host            # На другой порт
@@ -92,39 +93,39 @@ Iptables — это утилита для настройки правил фил
                   │POSTROUTING│ (nat/mangle)  ──> Пакет уходит
                   └───────────┘
 
-INPUT — пакеты, идущие к твоему серверу (кто-то стучится)
+`INPUT` — пакеты, идущие к твоему серверу (кто-то стучится)
 
-OUTPUT — пакеты, идущие от твоего сервера (ты стучишься наружу)
+`OUTPUT` — пакеты, идущие от твоего сервера (ты стучишься наружу)
 
-FORWARD — пакеты, которые проходят транзитом (сервер как роутер)
+`FORWARD` — пакеты, которые проходят транзитом (сервер как роутер)
 
 
 
-### Базовые команды iptables
+## Базовые команды iptables:
 
-# Посмотреть все правила
-iptables -L -v
-iptables -t nat -L -v    # Посмотреть таблицу NAT
+#### Посмотреть все правила
+`iptables -L -v`
+`iptables -t nat -L -v    # Посмотреть таблицу NAT`
 
-# Политики по умолчанию (что делать, если нет правила)
-iptables -P INPUT DROP    # По умолчанию блокировать входящие
-iptables -P OUTPUT ACCEPT # Разрешать исходящие
+#### Политики по умолчанию (что делать, если нет правила)
+`iptables -P INPUT DROP    # По умолчанию блокировать входящие`
+`iptables -P OUTPUT ACCEPT # Разрешать исходящие`
 
-# Разрешить SSH (чтобы не заблокировать себя)
-iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+#### Разрешить SSH (чтобы не заблокировать себя)
+`iptables -A INPUT -p tcp --dport 22 -j ACCEPT`
 
-# Разрешить уже установленные соединения
-iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+#### Разрешить уже установленные соединения
+`iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT`
 
-# Заблокировать конкретный IP
-iptables -A INPUT -s 192.168.1.100 -j DROP
+#### Заблокировать конкретный IP
+`iptables -A INPUT -s 192.168.1.100 -j DROP`
 
-# Разрешить только свой офисный IP на порт 443
-iptables -A INPUT -p tcp --dport 443 -s 95.25.15.0/24 -j ACCEPT
-iptables -A INPUT -p tcp --dport 443 -j DROP
+#### Разрешить только свой офисный IP на порт 443
+`iptables -A INPUT -p tcp --dport 443 -s 95.25.15.0/24 -j ACCEPT`
+`iptables -A INPUT -p tcp --dport 443 -j DROP`
 
-# Сохранить правила (чтобы не сбросились после перезагрузки)
-iptables-save > /etc/iptables/rules.v4
+#### Сохранить правила (чтобы не сбросились после перезагрузки)
+`iptables-save > /etc/iptables/rules.v4`
 
 
 ### Основное руководство по использованию iptables/nftables будет в ../2_networks/iptables.md и ../2_networks/nftables.md соответственно

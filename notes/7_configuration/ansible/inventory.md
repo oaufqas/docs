@@ -45,7 +45,7 @@ all:
  - `ansible_connection`: ssh/ winrm / local / docker
  -  `ansible_port`: 22 / 5986
  -  `ansible_user`: root
- -  `ansible_ssh_pass`,  `ansible_password`: password
+ -  `ansible_ssh_pass`,  `ansible_password`, `ansible_sudo_pass` : password
  -  `ansible_ssh_private_key_file`: path/to/file
  -  `ansible_python_interpreter`: path/to/file
 

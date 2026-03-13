@@ -5,22 +5,25 @@
 ## Команды для управления образами:
 
 
-docker **pull** nginx - Скачивает готовый образ из реестра (например, Docker Hub).
-docker **images** - Показывает список всех образов на вашем компьютере.
-docker **build** -t my-app:1.0 . - Собирает ваш собственный образ на основе Dockerfile.
-docker **tag** my-app:1.0 user/my-app:latest - Присваивает образу новое имя или версию (тег)
-docker **push** user/my-app:latest - Отправляет ваш образ в реестр (в облако)
-docker **rmi** nginx - Удаляет локальный образ (image remove)
-docker **inspect** python:3.9 - Показывает «подкапотные» детали образа (слои, переменные)
-**dive** [image_name] - утилита для детального просмотра образов
-docker image **prune** -a - Удаляет все неиспользуемые (висящие) образы
+- `docker pull nginx` - Скачивает готовый образ из реестра (например, Docker Hub).
+- `docker images` - Показывает список всех образов на вашем компьютере.
+- `docker build -t my-app:1.0 .` - Собирает ваш собственный образ на основе Dockerfile.
+- `docker tag my-app:1.0 user/my-app:latest` - Присваивает образу новое имя или версию (тег)
+- `docker push user/my-app:latest` - Отправляет ваш образ в реестр (в облако)
+- `docker rmi nginx` - Удаляет локальный образ (image remove)
+- `docker inspect python:3.9` - Показывает «подкапотные» детали образа (слои, переменные)
+- `dive [image_name]` - утилита для детального просмотра образов
+- `docker image prune -a` - Удаляет все неиспользуемые (висящие) образы
 
-docker **build -f Dockerfile.prod** -t my-app:prod . - Собрать с другим Dockerfile
-docker **build --no-cache** -t my-app:latest . - Собрать без кэша
-docker **cp my-container:/app/logs/app.log ./app.log** Скопировать файл из контейнера на хост
-docker **cp config.json my-container:/app/config.json** Скопировать файл с хоста в контейнер
-docker **save -o my-app.tar my-app:latest** Сохранить образ в файл
-docker **load -i my-app.tar** Загрузить образ из файла
+### Команды для buid:
+
+
+- `docker build -f Dockerfile.prod -t my-app:prod .` - Собрать с другим Dockerfile
+- `docker build --no-cache -t my-app:latest .` - Собрать без кэша
+- `docker cp my-container:/app/logs/app.log ./app.log` Скопировать файл из контейнера на хост
+- `docker cp config.json my-container:/app/config.json` Скопировать файл с хоста в контейнер
+- `docker save -o my-app.tar my-app:latest` Сохранить образ в файл
+- `docker load -i my-app.tar` Загрузить образ из файла
 
 
 
@@ -39,11 +42,11 @@ docker **load -i my-app.tar** Загрузить образ из файла
 
 # Визуальная структура папок в системе: 
 
-Если вы заглянете в /var/lib/docker/overlay2/, вы увидите длинные хеш-имена папок. Внутри каждой обычно находятся:
-diff/ — фактическое содержимое этого слоя.
-link — короткий идентификатор слоя.
-lower — файл со списком идентификаторов всех нижележащих слоев.
-merged/ — (только для запущенных контейнеров) результат слияния.
+Если вы заглянете в `/var/lib/docker/overlay2/`, вы увидите длинные хеш-имена папок. Внутри каждой обычно находятся:
+`diff/` — фактическое содержимое этого слоя.
+`link` — короткий идентификатор слоя.
+`lower` — файл со списком идентификаторов всех нижележащих слоев.
+`merged/` — (только для запущенных контейнеров) результат слияния.
 
 1. Экономия места: Если 10 образов используют один и тот же слой ubuntu:22.04, он хранится на диске в одном экземпляре.
 2. Скорость: Запуск контейнера происходит мгновенно, так как Docker нужно просто создать пустую папку UpperDir и «наложить» её на готовый образ.

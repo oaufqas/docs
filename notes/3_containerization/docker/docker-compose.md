@@ -12,15 +12,15 @@
 
 ### Главные команды Compose
 
-docker compose up - Поднимает все сервисы (добавьте -d для фона).
-docker compose down - Останавливает и удаляет контейнеры и сети проекта.
-docker compose stop/start - Просто останавливает/запускает контейнеры (без удаления).
-docker compose ps	- Показывает статус контейнеров конкретно этого проекта.
-docker compose logs -f - Показывает цветной поток логов от всех сервисов сразу.
-docker compose build - Пересобирает образы, если вы изменили Dockerfile.
-docker compose exec [service] [cmd] - Зайти в конкретный сервис (например, docker compose exec db bash).
-docker-compose up -d app db - Запустить только определенные сервисы
-docker-compose down --rmi all - Остановить и удалить с images
+- `docker compose up` - Поднимает все сервисы (добавьте -d для фона).
+- `docker compose down` - Останавливает и удаляет контейнеры и сети проекта.
+- `docker compose stop/start` - Просто останавливает/запускает контейнеры (без удаления).
+- `docker compose ps`	- Показывает статус контейнеров конкретно этого проекта.
+- `docker compose logs -f` - Показывает цветной поток логов от всех сервисов сразу.
+- `docker compose build` - Пересобирает образы, если вы изменили Dockerfile.
+- `docker compose exec [service] [cmd]` - Зайти в конкретный сервис (например, docker compose exec db bash).
+- `docker-compose up -d app db` - Запустить только определенные сервисы
+- `docker-compose down --rmi all` - Остановить и удалить с images
 
 
 # Пример:

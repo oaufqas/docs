@@ -1,3 +1,14 @@
+### Gitlab-ci:
+- #### [[./gitlab-ci/basics_gitlab|Basics_gitlab]]
+- #### [[./gitlab-ci/runners|Runners]]
+- #### [[./gitlab-ci/pipline_syntax|Pipline-syntax]]
+- #### [[./gitlab-ci/variables|Variables]]
+- #### [[./gitlab-ci/jobs|Jobs]]
+- #### [[./gitlab-ci/cache-artefacts|Cache, artefacts]]
+
+### Jenkins:
+
+
 ### Основные понятия CI/CD
 Чтобы понять, как работают CI/CD, важно разобраться в их основных компонентах и принципах. Эти два понятия — 
 **Continuous Integration** (Непрерывная интеграция) и 

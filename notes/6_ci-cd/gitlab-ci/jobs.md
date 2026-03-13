@@ -10,6 +10,20 @@ failing_job:
     - echo "This won't print"  # До сюда не дойдёт
 ```
 
+## Почему `.full-deploy` может быть с точкой?
+
+В GitLab CI `.` в начале имени означает **скрытый job** — он не будет выполняться как отдельная задача, только как [[pipline_syntax#Якоря (anchors) и алиасы (aliases)|шаблон]].
+
+```yaml
+
+.full-deploy: &full-deploy  # С точкой = скрытый, только для шаблонов
+  stage: deploy
+  
+  
+visible-job:  # Без точки = будет выполняться
+  <<: *full-deploy
+  script: echo "Я видим!"
+```
 
 
 ## Jobs — определение задач

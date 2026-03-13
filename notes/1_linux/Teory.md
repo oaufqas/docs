@@ -1,4 +1,14 @@
-Основные конфигурационные файлы:
+- #### [[basic-commands|Базовые команды]]
+- #### [[file-system|Файловая система]]
+- #### [[processes|Процессы]]
+- #### [[environments_variables|Переменные окружения]]
+- #### [[networking-firewall|Сеть и файервол]] !
+- #### [[user-permissions|Права и пользователи]]
+- #### [[package-management|Package-management]]
+- #### [[bash-scripting|Баш-скриптинг]]
+- #### [[systemd|Systemd]]
+
+#### Основные конфигурационные файлы:
 
 /etc/apt/sources.list  - Смена зеркал
 /etc/network/interfaces  - Сетевые интерфейсы

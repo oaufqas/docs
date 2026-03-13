@@ -1,3 +1,4 @@
+```yml
 # Шаблон GitLab CI для Docker сборки и публикации
 # Подходит для проектов, где нужно просто собрать и загрузить образ
 
@@ -44,3 +45,4 @@ docker-release:
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
   only:
     - tags
+```

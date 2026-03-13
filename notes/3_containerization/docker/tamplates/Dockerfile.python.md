@@ -1,8 +1,11 @@
-# Шаблон Dockerfile для Python приложения
-# Использование:
-#   docker build -t myapp .
-#   docker run -p 8000:8000 myapp
+### Шаблон Dockerfile для Python приложения
+##### Использование:
 
+`docker build -t myapp .`
+`docker run -p 8000:8000 myapp`
+
+
+```yml
 FROM python:3.11-slim AS builder
 
 # Устанавливаем системные зависимости (если нужны)
@@ -49,3 +52,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Запуск
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
+```

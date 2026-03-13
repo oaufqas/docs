@@ -2,6 +2,7 @@
 version: '3.8'
 
 # ---------- СЕТИ ----------
+```yml
 networks:
   frontend-network:
     driver: bridge
@@ -13,8 +14,10 @@ networks:
     internal: true  # Изолированная сеть без доступа к интернету
   monitoring-network:
     driver: bridge
+```
 
 # ---------- ТОМА (VOLUMES) ----------
+```yml
 volumes:
   mysql-data:
     driver: local
@@ -26,20 +29,26 @@ volumes:
     driver: local
   uploads-data:
     driver: local
+```
 
 # ---------- СЕКРЕТЫ (для Docker Swarm) ----------
+```
 # secrets:
 #   db_password:
 #     file: ./secrets/db_password.txt
 #   jwt_secret:
 #     file: ./secrets/jwt_secret.txt
+```
 
-# ---------- КОНФИГУРАЦИИ (для Docker Swarm) ----------
+# ---------- КОНФИГУРАЦИИ (для Docker Swarm) ---------
+```
 # configs:
 #   nginx_config:
 #     file: ./nginx/nginx.conf
+```
 
 # ---------- СЕРВИСЫ ----------
+```
 services:
   # ----- БАЗА ДАННЫХ MySQL -----
   mysql:
@@ -110,8 +119,10 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+```
 
   # ----- REDIS (кэш) -----
+```yml
   redis:
     image: redis:7-alpine
     container_name: ${PROJECT_NAME:-app}-redis
@@ -127,8 +138,9 @@ services:
       timeout: 5s
       retries: 3
     restart: unless-stopped
-
+```
   # ----- ОСНОВНОЕ ПРИЛОЖЕНИЕ (API) -----
+```yml
   api:
     build:
       context: ./api
@@ -187,8 +199,9 @@ services:
         order: stop-first
     
     restart: unless-stopped
-
+```
   # ----- NGINX (reverse proxy) -----
+```yml
   nginx:
     image: nginx:alpine
     container_name: ${PROJECT_NAME:-app}-nginx
@@ -217,8 +230,10 @@ services:
       retries: 3
     
     restart: unless-stopped
+```
 
-  # ----- ADMINER (управление БД, только для разработки) -----
+  # -- ADMINER (управление БД, только для разработки) --
+```yml
   adminer:
     image: adminer:latest
     container_name: ${PROJECT_NAME:-app}-adminer
@@ -234,8 +249,10 @@ services:
     profiles:
       - dev
       - tools
+```
 
   # ----- PORTAINER (управление Docker) -----
+```yml
   portainer:
     image: portainer/portainer-ce:latest
     container_name: portainer
@@ -250,8 +267,9 @@ services:
     profiles:
       - tools
       - admin
-
+```
   # ----- PROMETHEUS (мониторинг) -----
+```yml
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -267,8 +285,10 @@ services:
       - "9090:9090"
     profiles:
       - monitoring
+```
 
   # ----- GRAFANA (визуализация) -----
+```yml
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -286,12 +306,12 @@ services:
       - prometheus
     profiles:
       - monitoring
-
-# ---------- ДОПОЛНИТЕЛЬНЫЕ КОММЕНТАРИИ ----------
-# Полезные команды:
-# docker-compose up -d --build
-# docker-compose down -v  (удалить тома!)
-# docker-compose logs -f service_name
-# docker-compose exec service_name sh
-# docker-compose --profile dev up -d
-# docker-compose config  (проверить конфиг)
+```
+## ---------- ДОПОЛНИТЕЛЬНЫЕ КОММЕНТАРИИ ----------
+### Полезные команды:
+#### docker-compose up -d --build
+#### docker-compose down -v  (удалить тома!)
+#### docker-compose logs -f service_name
+#### docker-compose exec service_name sh
+#### docker-compose --profile dev up -d
+#### docker-compose config  (проверить конфиг)

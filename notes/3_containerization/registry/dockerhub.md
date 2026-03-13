@@ -11,11 +11,13 @@ docker logout - Выход из учетной записи реестра.
 
 **Docker Hub также поддерживает приватные репозитории**, но позволяет создать только 1 приватный репозиторий на аккаунт. Количество публичных репозиториев при этом не ограничено.
 
-# private registry
+### private registry in dockerhub
+
 ```
 docker push docker.io/pliutau/hello-world:v0
 ```
-### В случае Docker Hub можно пропустить часть, относящуюся к registry, это означает что docker hub является регистром по умолчанию
+##### В случае Docker Hub можно пропустить часть, относящуюся к registry, это означает что docker hub является регистром по умолчанию
+
 ```
 docker push pliutau/hello-world:v0
 ```
