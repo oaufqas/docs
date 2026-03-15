@@ -1,11 +1,12 @@
 My personal DevOps knowledge base. It contains notes, cheat sheets, and useful resources.
 
 ## Navigation
+
 - [Linux](./notes/1_linux/Teory)
 - [Networks](./notes/2_networks/Teory)
 - [Containerization (Docker, Registry)](notes/3_containerization/Teory)
-- [Web-servers (Nginx, Apache, Haproxy)](./notes/4_web-servers)
-- [Data bases (sql, nosql)](./notes/5_databases)
+- [Web-servers (Nginx, Apache, Haproxy)](./notes/4_web-servers/Teory)
+- [Data bases (sql, nosql)](./notes/5_databases/Teory)
 - [CI/CD (Gitlab-ci, Jenkins)](./notes/6_ci-cd/Teory)
 - [Configuration (Ansible, Saltstack)](./notes/7_configuration/Teory)
 - [Orchestration (K8s, Swarm)](./notes/8_orchestration)
@@ -15,6 +16,3 @@ My personal DevOps knowledge base. It contains notes, cheat sheets, and useful r
 - [Clouds (Yandex, AWS)](./notes/12_clouds)
 - [Theory (DevOps, SRE)](./notes/13_theory)
 - [Scripts](./notes/14_scripts)
-
-- [Популярные команды](commands.md)
-- [Шаблоны](./templates)

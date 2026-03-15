@@ -1,5 +1,8 @@
 {
   "alwaysUpdateLinks": true,
   "spellcheck": false,
-  "promptDelete": false
+  "promptDelete": false,
+  "newFileLocation": "current",
+  "newFileFolderPath": ".images",
+  "attachmentFolderPath": "images"
 }

@@ -35,4 +35,5 @@ sudo echo "<username> ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers - права s
 cat /etc/group - Вывести все группы
 cat /etc/passwd - Вывести всех пользователей
 ```
-Менять разрешения на использование sudo: etc/sudoers или sudo visudo
+
+Менять разрешения на использование sudo: `etc/sudoers` или `sudo visudo`
