@@ -9,5 +9,5 @@ source ansible_env/bin/activate # Выйти из среды - deactivate
 pip install ansible
 ```
 
-## [[networking-firewall#SSH|Создание ключей]]
+## [[notes/1_linux/networking#SSH|Создание ключей]]
 

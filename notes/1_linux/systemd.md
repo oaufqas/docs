@@ -1,4 +1,4 @@
-#### Отличие демона от процесса
+### Отличие демона от процесса
 
 - **Процесс** — это любая запущенная программа (калькулятор, браузер, команда `ls`). Обычно он привязан к твоему окну или терминалу: закрыл терминал — процесс умер.
 - **Демон (Daemon)** — это процесс, который **отвязался** от терминала и ушел работать в фон. Он живет сам по себе, не имеет графического окна и обычно запускается системой при старте.
@@ -10,6 +10,59 @@
 |**Привязка**|Зависит от пользователя (сессии).|Зависит от системы (работает даже если никто не залогинен).|
 |**Примеры**|`python script.py`, `ls`, `chrome`.|`httpd` (Apache), `sshd`, `mysql`.
 
+### Загрузка системы (Boot process)
+
+##### Этапы загрузки
+
+```text
+1. BIOS/UEFI
+   ↓
+2. Bootloader (GRUB)
+   ↓
+3. Kernel (загрузка ядра)
+   ↓
+4. initramfs (временная ФС)
+   ↓
+5. init/systemd (PID 1)
+   ↓
+6. Запуск сервисов
+   ↓
+7. Login prompt
+```
+
+#### GRUB (Grand Unified Bootloader)
+
+```bash
+/boot/grub/grub.cfg     # Конфигурация (не редактировать вручную!)
+/etc/default/grub       # Настройки для генерации конфига
+update-grub             # Обновить конфиг (Debian/Ubuntu)
+grub2-mkconfig          # Обновить конфиг (RHEL/CentOS)
+```
+
+#### initramfs (initrd)
+
+Временная корневая ФС в памяти:
+- Содержит драйверы для монтирования реальной ФС
+- Загружается до настоящей корневой ФС
+
+### Runlevels (SysV init) и Targets (systemd)
+
+|SysV|systemd target|Описание|
+|---|---|---|
+|0|poweroff.target|Выключение|
+|1|rescue.target|Однопользовательский режим|
+|2|multi-user.target|Мультипользовательский (без GUI)|
+|3|multi-user.target|То же|
+|4|multi-user.target|То же|
+|5|graphical.target|С GUI|
+|6|reboot.target|Перезагрузка|
+
+
+```bash
+systemctl get-default               # Текущий target
+systemctl set-default multi-user.target  # Установить
+systemctl isolate multi-user.target  # Переключить сейчас
+```
 
 ### `Systemd` (системный демон):
 
@@ -63,7 +116,7 @@
 `/usr/lib/systemd/system/..`
 `/run/systemd/system/`
 
-
+###### `Service` считается устаревшей утилитой, для управления `init`-процессом, на ее замену пришла `systemctl`
 ##### Systemctl (system control) - это утилита, для управления systemd
 
 - `systemctl start/stop ${name}` - запуск unit'ов
@@ -75,13 +128,48 @@
 - `systemctl reset-failed` - сбросить лимит ошибок (при надобности)
 - `systemctl cat ${name}` - увидеть содержимое unit'а и его override'ов
 
+---
+
 ##### Journalctl (journal control) - утилита, для чтения и фильтрации логов от journald
 
 ```bash
 journalctl -efa # Логи в структурированном виде
+journalctl -efu ${unit_name} # Выбранный юнит
+journalctl                    # Все логи
+journalctl --since "1 hour ago"
+journalctl -p err            # Только ошибки
+journalctl --namespace=${namespace} # Логи указанного namespace
+--grep # grep в логах
 -e # Перемещение в конец логов (на текущий момент)
 -f # Слежка за новыми логами
 -a # Все юниты
 -t # Выбранный тег
-journalctl -efu ${unit_name} # Выбранный юнит
 ```
+
+![[Pasted image 20260316203516.png|697]]
+#### Уровни логирования (от критичных к отладочным):
+
+```text
+0 - emerg   (система неработоспособна)
+1 - alert   (требуется немедленное вмешательство)
+2 - crit    (критическое условие)
+3 - err     (ошибка)
+4 - warning (предупреждение)
+5 - notice  (нормальное, но важное событие)
+6 - info    (информационное сообщение)
+7 - debug   (отладочная информация)
+```
+
+#### Частые лог-файлы
+
+```bash
+/var/log/syslog        # Системный лог (Debian/Ubuntu)
+/var/log/messages      # Системный лог (RHEL/CentOS)
+/var/log/auth.log      # Аутентификация
+/var/log/kern.log      # Ядро
+/var/log/dmesg         # Сообщения ядра при загрузке
+/var/log/nginx/        # Логи nginx
+/var/log/mysql/        # Логи MySQL
+```
+
+

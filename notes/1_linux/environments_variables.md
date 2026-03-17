@@ -28,3 +28,33 @@
 - Синтаксис использования: Переменные заключаются в знаки процента, например: `%PATH%` или `%USERPROFILE%`
 
 Например `setx SSLKEYLOGFILE "C:\temp\sslkeys.log"` - переменная, которая сохраняет секреты TLS-шифрований в браузерах.
+
+### Важные переменные
+
+```bash
+PATH        # Где искать исполняемые файлы
+HOME        # Домашняя папка
+USER        # Текущий пользователь
+SHELL       # Текущий shell
+PWD         # Текущая директория
+LANG        # Язык и кодировка
+TERM        # Тип терминала
+```
+
+### Управление переменными
+
+```bash
+# Установка
+MY_VAR="hello"
+export MY_VAR="hello"
+# Использование
+echo $MY_VAR
+echo ${MY_VAR}world
+# Постоянные переменные
+echo 'export MY_VAR="hello"' >> ~/.bashrc
+source ~/.bashrc
+# Приоритет загрузки (login shell)
+/etc/profile
+~/.profile
+~/.bashrc
+```

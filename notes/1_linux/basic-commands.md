@@ -97,6 +97,7 @@
 
 **Система**
 
+`cat /etc/os-release`, `lsb_release -a` - узнать дистрибутива Linux
 `uname` – Показать информацию о системе
 `uname` -r – Показывает информацию о ядре Linux
 `uptime` – Продолжительность работы системы и средняя загрузка
@@ -131,12 +132,45 @@
 ---
 #### Полезные команды:
 
-`kill -9 $(ps aux | grep process | awk '{print $2}')` - Найти и убить процесс
-`tail -f /var/log/syslog | grep ERROR` - Мониторинг лога в реальном времени
-`find . -name "*.js" | xargs wc -l` - Подсчет строк в файлах
-`wget -r -l 10 -k -p http://example.com` - Скачать весь сайт
-`mysqldump --all-databases | gzip > backup.sql.gz` - Бэкап MySQL баз
-`find / -type f -size +100M -exec ls -lh {} \; 2>/dev/null` - Найти большие файлы
-`watch -n 1 'ps aux | grep nginx'` - Мониторинг в реальном времени
-`openssl rand -base64 32` - Сгенерировать пароль
-`for host in server{1..10}; do ssh $host "uptime"; done` - Выполнить команду на всех серверах
+```
+kill -9 $(ps aux | grep process | awk '{print $2}')         # Найти и убить процесс
+tail -f /var/log/syslog | grep ERROR           # Мониторинг лога в реальном времени
+find . -name "*.js" | xargs wc -l                          # Подсчет строк в файлах
+wget -r -l 10 -k -p http://example.com                          # Скачать весь сайт
+mysqldump --all-databases | gzip > backup.sql.gz                  # Бэкап MySQL баз
+find / -type f -size +100M -exec ls -lh {} \; 2>/dev/null     # Найти большие файлы
+watch -n 1 'ps aux | grep nginx'                    # Мониторинг в реальном времени
+openssl rand -base64 32                                      # Сгенерировать пароль
+for host in server{1..10}; do ssh $host "uptime"; done # Выполнить команду на всех серверах
+
+
+# Система в целом
+uname -a                  # Информация о ядре
+uptime                    # Время работы, нагрузка
+dmesg | tail              # Последние сообщения ядра
+
+# Процессы
+ps auxf                   # Дерево процессов
+top -o %CPU               # Процессы по CPU
+htop                      # Красивый top
+
+# Память
+free -h                   # Использование RAM
+vmstat 1                  # Статистика VM
+cat /proc/meminfo         # Детальная информация
+
+# Диски
+df -h                     # Свободное место
+du -sh *                  # Размер папок
+iostat -x 1               # I/O статистика
+
+# Сеть
+ip -br a                  # IP адреса
+ss -tulpn                 # Открытые порты
+ping -c 4 google.com      # Проверка связи
+curl -I example.com       # HTTP заголовки
+
+# Логи
+journalctl -xe            # Последние ошибки
+tail -f /var/log/syslog   # Лог в реальном времени
+```
