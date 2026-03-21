@@ -30,6 +30,12 @@
 7. Login prompt
 ```
 
+#### Посмотреть время загрузки сервисов:
+
+```bash
+systemd-analyze   # Время загрузки ядра и системы
+systemd-analyze blame   # Время загрузки всех systemd сервисов
+```
 #### GRUB (Grand Unified Bootloader)
 
 ```bash
@@ -110,6 +116,99 @@ systemctl isolate multi-user.target  # Переключить сейчас
 
 - `${name}.service.d/${01_some_override}.conf` или `systemctl edit ${name}` - возможность редактировать unit (override)
 
+
+##### Для примера, давайте создадим службу, которая будет запускать наш скрипт /usr/bin/habr:
+
+```bash
+#!/bin/bash
+echo Hello, Habr!
+```
+
+После выдадим права на запуск:
+
+```bash
+sudo chmod +x /usr/bin/habr
+```
+
+После этого создадим /etc/systemd/system/habr.service со следующим содержанием:
+
+```
+[Unit]
+Description=SimpleService
+After=default.target
+
+[Service]
+ExecStart=/usr/bin/habr
+
+[Install]
+WantedBy=default.target
+```
+
+После релоадним демоны и включим наш сервис:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable habr
+```
+
+#### Пример сервиса (SSHD, ssh daemon)
+
+```
+[Unit]
+Description=OpenSSH server daemon
+Documentation=man:sshd(8) man:sshd_config(5)
+After=network.target sshd-keygen.target
+Wants=sshd-keygen.target
+ 
+[Service]
+Type=notify
+EnvironmentFile=-/etc/crypto-policies/back-ends/opensshserver.config
+EnvironmentFile=-/etc/sysconfig/sshd
+ExecStart=/usr/sbin/sshd -D $OPTIONS $CRYPTO_POLICY
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=on-failure
+RestartSec=42s
+ 
+[Install]
+WantedBy=multi-user.target
+```
+
+#### Объяснение ниже:
+
+```
+[Unit]
+Description – описание юнита для большего понимания
+Documentation – документация по процессу sshd
+After – зависимость, т.е. в данном случае запускать юнит только после запуска network.target и sshd-keygen.target
+Wants – еще одна зависимость, означает желательно. В примере Wants=sshd-keygen.target, т.е. желательно чтобы было запущено sshd-keygen.target . Желательно, но не обязательно.
+
+[Service]
+Type – типы запуска служб. Могут быть:
+
+simple (по умолчанию) – происходит незамедлительный запуск этой службы, с учетом того что процесс не разветвляется (fork). Не используйте simple если пользуетесь очередностью запуска. Одно исключение это активация сокета.
+
+forking – служба считается запущенной после того, после разветвления процесса с завершением родительского процесса. Используется для запуска классических демонов исключая случаи, когда в таком поведении процесса нет необходимости. Также желательно указать PIDFile=, чтобы systemd мог отслеживать основной процесс.
+
+oneshot – удобен для скриптов, которые выполняют одно задание и завершаются. При необходимости можно задать параметр RemainAfterExit=yes, чтобы systemd считал процесс активным даже после его завершения.
+
+notify – идентичен параметру simple, но с оговоркой, что демон пошлет systemd сигнал о своей готовности. Эталонная реализация данного уведомления представлена в libsystemd-daemon.so.
+
+dbus – служба считается находящейся в состоянии готовности, когда указанный параметр BusName появляется в системной шине DBus.
+
+idle – откладывается выполнение двоичного файла службы до момента выполнения всех остальных задач. В остальном поведение аналогично simple.
+Далее в разделе Service
+
+EnvironmentFile – файлы переменного окружения
+ExecStart – полный путь к исполняемому файлу программы с параметрами запуска
+ExecReload – полный пусть к исполняемому файлу программы с параметрами перезапуска программы
+KillMode – указывается как будет завершен процесс. В данному случае параметр process говорит о том что будет закрыт только главный процесс
+Restart – перезагрузка процесса, параметр on-failure указывает на автоматическую перезагрузку в случае отказа процесса
+RestartSec – время ожидания через которое процесс должен перезагрузиться
+[Install]
+WantedBy – указывает на каком уровне запуска
+```
+
 #### Где лежат unit'ы:
 
 `/etc/systemd/system/..`
@@ -127,10 +226,32 @@ systemctl isolate multi-user.target  # Переключить сейчас
 - `systemctl daemon-reload` - сообщение, об окончании редактирования unit'ов systemd
 - `systemctl reset-failed` - сбросить лимит ошибок (при надобности)
 - `systemctl cat ${name}` - увидеть содержимое unit'а и его override'ов
+- `systemctl restart ${name}` - перезапуск службы
+- `systemctl is-enabled ${name}` - включен ли автозапуск службы
+- `systemctl poweroff` - выключение системы
+- `systemctl suspend` - перевод системы в спящий режим системы
+- `systemctl hibernate` - гибернация системы
+- `systemctl reboot` - перезагрузка системы
+- `systemctl list-units` - отображает все активные юниты
+- `systemctl list-unit-files` - отображает все доступные юнит-файлы
+- `systemctl isolate "системный уровень, таргет"` - переключает систему в указанный системный уровень
+- `systemctl mask "название юнита"` - запрещает запуск данного юнита, маскирует его
+- `systemctl unmask "название юнита"` - разрешает запуск данного юнита
+- `systemctl --failed` - показывает все службы, которые не смогли запуститься из-за ошибки.
+
+##### Удаленное управление systemd:
+
+Системой и менеджером служб systemd на удаленном сервере можно управлять через ssh, благодаря systemctl.
+
+Для этого надо просто использовать флаг `--host`:
+
+```bash
+systemctl --host root@hostname status nginx.service
+```
 
 ---
 
-##### Journalctl (journal control) - утилита, для чтения и фильтрации логов от journald
+### Journalctl (journal control) - утилита, для чтения и фильтрации логов от journald
 
 ```bash
 journalctl -efa # Логи в структурированном виде
@@ -144,6 +265,30 @@ journalctl --namespace=${namespace} # Логи указанного namespace
 -f # Слежка за новыми логами
 -a # Все юниты
 -t # Выбранный тег
+-n 100 — показывает первые 100 записей в журнале (вместо 100 можно использовать любое другое число)
+_SYSTEMD_UNIT=earlyoom.service — просмотр записей, связанных с юнитом earlyoom.service
+_COMM=sshd — показывает все записи, связанные с процессом sshd
+_PID=1000 — показывает все записи, связанные с PID 1000
+_UID=1000 — показывает все записи, связанные с UID 1000
+_GID=1000 — показывает все записи, связанные с GID 1000
+_HOSTNAME=linux — показывает все записи, связанные с хостом linux
+--since 2024-01-01 — показывает все записи, начиная с указанной даты
+--until 2024-01-01 — показывает все записи, заканчивая указанной датой
+--since -1h — показывает все записи за последний час
+--since -1days — показывает все записи за последние сутки
+--vacuum-size=10M — удаляет записи, пока журнал не станет весом 10МБ.
+--vacuum-time=1week — удаляет записи старше 1 недели.
+--output=short — показывает записи в компактном виде
+--output=verbose  — показывает записи в расширенном виде
+--output=json — показывает записи в json-формате
+--verify — проверяет целостность журнала
+-xeu "service" — отображает записи в формате JSON (-x) и единого события (-e) по указанной службе (-u).
+-feu "service" — отображает записи в режиме реального времени (-f) и единого события (-e) по указанной службе (-u).
+--list-boots — отображеает журналы, которые были созданы при загрузке системы
+-b 0 — просмотреть журнал с текущего старта системы
+-b -1 — просмотреть журнал с предыдущего старта системы
+-k — просмотр сообщений ядра
+
 ```
 
 ![[Pasted image 20260316203516.png|697]]
@@ -173,3 +318,21 @@ journalctl --namespace=${namespace} # Логи указанного namespace
 ```
 
 
+---
+
+## Systemd-resolved - внутренний DNS сервер
+
+![[Pasted image 20260320125842.png]]
+
+#### Утилита для взаимодействия с resolved - resolvectl, основные команды:
+
+- `resolvectl` - Список статусов DNS серверов для всех интерфейсов, 
+- `resolvectl status ${interface}` - Статусы DNS конкретного интерфейса
+- `resolvectl service ${name} ${type} ${domain}` - Запрос на получение SRV-записей
+- `resolvectl statistics` - Выводит статистику работы резолвера, включая объем кэша и количество попаданий/промахов в него
+- `resolvectl flush-caches` - Сбросить DNS кэш
+- `resolvectl monitor` - Смотреть в realtime запросы к resolved
+- `resolvectl query ${domain}` — резолвит (ищет IP) указанного домена.
+- `resolvectl dns ${interface} ${server_ip}` — устанавливает DNS-сервер для конкретного сетевого интерфейса (например, `eth0` или `wlan0`).
+- `resolvectl domain ${interface} ${domain}` — задает поисковые домены для интерфейса.
+- `resolvectl dnsovertls ${interface} <yes/no/opportunistic>` — включает или отключает шифрование DNS-запросов (DNS-over-TLS) для выбранного интерфейса.

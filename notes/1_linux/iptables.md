@@ -11,7 +11,7 @@
  **Сохранение правил (Debian/Ubuntu):**  
 
 ```bash
-sudo apt-get install iptables-persistent
+sudo apt-get install iptables-persistent -y
 sudo systemctl enable netfilter-persistent
 
 # Сохранение изменений
