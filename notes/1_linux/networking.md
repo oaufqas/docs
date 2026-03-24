@@ -157,6 +157,7 @@ curl -v https://example.com
 **Основные флаги:**
 
 - **`-O`** — сохранить файл под конкретным именем
+- Символ дефиса `-` после него (`-O-`) — это стандартное обозначение для **stdout** (стандартный поток вывода в консоль).
 
 ```bash
 wget -O my.zip url
@@ -182,6 +183,8 @@ wget -r -A.jpg, .png https://example.com
 wget -c https://example.com
 # Скачать файл, игнорируя ошибки SSL-сертификата:  
 wget --no-check-certificate https://expired-site.com
+# Вывод результата в консоль, аналог curl
+wget -qO- http://my-service:80
 ```
 
 ---
