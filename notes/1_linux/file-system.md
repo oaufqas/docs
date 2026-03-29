@@ -1,4 +1,3 @@
-
 | Команда | Описание                 | Пример                   |
 | ------- | ------------------------ | ------------------------ |
 | df      | Использование дисков     | df -h (человекочитаемый) |
@@ -13,6 +12,7 @@
 
 ### Файловая система
 
+```bash
 FHS (Filesystem Hierarchy Standard)
 
 / (root)
@@ -40,11 +40,11 @@ FHS (Filesystem Hierarchy Standard)
     ├── log
     ├── cache
     └── lib
+```
 
 
-
-## Типы файлов в Linux
-
+---
+### Типы файлов в Linux
 
 | Тип                     | Обозначение | Пример     |
 | ----------------------- | :---------: | ---------- |
@@ -56,8 +56,7 @@ FHS (Filesystem Hierarchy Standard)
 | Сокет                   |      s      | srwxrwxrwx |
 | Pipe (FIFO)             |      p      | prw-r--r-- |
 
-
-## inode (Index Node)
+### inode (Index Node)
 
 Каждый файл имеет inode - структуру с метаданными:
 

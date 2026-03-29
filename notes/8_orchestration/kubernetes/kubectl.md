@@ -109,11 +109,11 @@
 
 ##### Лейблы и аннотации
 
-|Команда|Описание|
-|---|---|
-|`kubectl label pod nginx app=web`|Добавить лейбл|
-|`kubectl label pod nginx app-`|Удалить лейбл (минус в конце)|
-|`kubectl annotate pod nginx description="my app"`|Добавить аннотацию|
+| Команда                                           | Описание                      |
+| ------------------------------------------------- | ----------------------------- |
+| `kubectl label pod nginx app=web`                 | Добавить лейбл                |
+| `kubectl label pod nginx app-`                    | Удалить лейбл (минус в конце) |
+| `kubectl annotate pod nginx description="my app"` | Добавить аннотацию            |
 
 ##### Namespace
 

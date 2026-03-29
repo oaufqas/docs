@@ -6,16 +6,28 @@
 - #### [[./gitlab-ci/jobs|Jobs]]
 - #### [[./gitlab-ci/cache-artefacts|Cache, artefacts]]
 
+### Argo-cd:
+- #### [[notes/6_ci-cd/argo-cd/installation|Installation]] 
+- #### [[notes/6_ci-cd/argo-cd/basics|Basics argoCD]]
+- #### [[./argo-cd/application|Application]]
+
 ### Jenkins:
+- #### [[basics_jenkins|Basics jenkins]] 
+- #### [[notes/6_ci-cd/jenkins/installation|Installation]] 
+- #### [[jenkinsfile|JenkinsFile]] 
+- #### [[pipelines|Piplines]] 
+- #### [[plugins|Plugins]]
 
-
+---
 ### Основные понятия CI/CD
+
 Чтобы понять, как работают CI/CD, важно разобраться в их основных компонентах и принципах. Эти два понятия — 
 **Continuous Integration** (Непрерывная интеграция) и 
 **Continuous Delivery/Deployment** (Непрерывная доставка/развёртывание) — тесно связаны, но решают разные задачи.
 
 
 ## Определение CI (Continuous Integration)
+
 Непрерывная интеграция (CI) — это практика, при которой разработчики регулярно объединяют свои изменения в общий репозиторий, что автоматически инициирует сборку и тестирование для оперативного выявления ошибок.
 
 **Основные принципы CI:**
@@ -25,6 +37,7 @@
 
 
 ## Определение CD (Continuous Delivery / Continuous Deployment)
+
 Непрерывная доставка (Continuous Delivery) и непрерывное развёртывание (Continuous Deployment) — это шаги после CI, автоматизирующие процесс доставки кода в различные среды, такие как тестовая, staging или production.
 Различие между Continuous Delivery и Continuous Deployment:
 

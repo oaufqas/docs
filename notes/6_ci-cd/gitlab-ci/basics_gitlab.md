@@ -1,4 +1,4 @@
-### ------------------------ installation gitlab -------------------------
+### Installation gitlab
 
 ```bash
 curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
@@ -23,9 +23,9 @@ sudo EXTERNAL_URL="http://host" apt-get install gitlab-ce
 
 ##### After download:
 
-- Url local gitlab: http://host:80
-- Username: root
-- Password: /etc/gitlab/initial_root_password
+- `Url local gitlab: http://host:80`
+- `Username: root`
+- `Password: /etc/gitlab/initial_root_password`
 
 
 ##### Остановить/запустить все процессы gitlab:
@@ -34,11 +34,10 @@ sudo EXTERNAL_URL="http://host" apt-get install gitlab-ce
 sudo gitlab-ctl stop/start
 ```
 
-Установка раннера в [[runners]]
+##### Для работы gitlab-ci необходима [[runners|установка раннера]]
 
 
-
-### --------------------------------- Теория ----------------------------------
+### Теория
 
 
 **GitLab** — это комплексная DevSecOps-платформа, построенная вокруг Git, которая объединяет управление репозиториями, CI/CD-конвейеры (автоматизация сборки/тестирования), трекер задач (issues) и Wiki. Ключевые компоненты: репозитории, ветки, Merge Requests для ревью кода, раннеры (runners) для выполнения задач и пайплайны. 

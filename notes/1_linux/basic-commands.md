@@ -132,7 +132,9 @@
 ---
 #### Полезные команды:
 
-```
+```bash
+alias k=kubectl   # Заменять коменды (алиасы в консоли)
+
 kill -9 $(ps aux | grep process | awk '{print $2}')         # Найти и убить процесс
 tail -f /var/log/syslog | grep ERROR           # Мониторинг лога в реальном времени
 find . -name "*.js" | xargs wc -l                          # Подсчет строк в файлах
