@@ -155,6 +155,9 @@ dmesg | tail              # Последние сообщения ядра
 ps auxf                   # Дерево процессов
 top -o %CPU               # Процессы по CPU
 htop                      # Красивый top
+strace ls                 # Системные вызовы
+lsof /var/log             # Каким процессом занят файл
+ps -fp 123                # Инфо о процессе
 
 # Память
 free -h                   # Использование RAM
@@ -165,12 +168,16 @@ cat /proc/meminfo         # Детальная информация
 df -h                     # Свободное место
 du -sh *                  # Размер папок
 iostat -x 1               # I/O статистика
+smartctl -a /dev/sda      # Статистика дисков
 
 # Сеть
 ip -br a                  # IP адреса
-ss -tulpn                 # Открытые порты
+ifconfig                  # Сетевые интерфейсы
+netstat -rn               # Сетевые маршруты
+ss/netstat -tulpn         # Открытые порты
 ping -c 4 google.com      # Проверка связи
 curl -I example.com       # HTTP заголовки
+dif domain.com            # DNS
 
 # Логи
 journalctl -xe            # Последние ошибки

@@ -14,7 +14,7 @@
 | `groups`  | Группы пользователя  | groups user
 | `sudo`	| Выполнить от root	   | sudo command
 | `gpasswd` | Удалить из группы    | sudo gpasswd -d <имя_пользователя> <имя_группы>
-
+| `sudo -i` | Правильное переключение под рута| sudo -i
 **Права в цифрах:**
 - 4 = read (r)
 - 2 = write (w)

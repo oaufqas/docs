@@ -1,3 +1,6 @@
+![[Pasted image 20260406172732.png]]
+
+
 #### Install kubectl
 
 1. Download latest release (Linux x86-64)
@@ -17,3 +20,4 @@ sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 ```bash
 kubectl version --client
 ```
+
