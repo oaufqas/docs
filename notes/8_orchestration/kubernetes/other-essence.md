@@ -1,5 +1,166 @@
 # StatefulSet
 
+#### 4 ключевые особенности StatefulSet
+
+1. **Стабильное имя (Network ID):** Поды именуются по порядку: `web-0`, `web-1`, `web-2`. Если под `web-0` упадет, новый под получит то же самое имя.
+2. **Стабильное хранилище (Storage):** Каждый под получает свой собственный том (PersistentVolume). Если под переезжает на другой узел, его диск «переезжает» вместе с ним.
+3. **Порядок запуска и удаления:** Поды запускаются строго по очереди (0, затем 1, затем 2) и удаляются в обратном порядке. Это критично для кластеров (например, чтобы сначала запустить Master, а потом Slaves).
+4. **Headless Service:** Для работы StatefulSet требуется специальный сервис без IP-адреса, который позволяет обращаться к конкретному поду по DNS-имени (например, `web-0.nginx-service`).
+
+Пример манифеста:
+
+```yaml
+# 1. Headless Service для сетевой идентификации
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-hs
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None # Ключевая деталь: делает сервис Headless
+  selector:
+    app: nginx
+---
+# 2. Сам StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  serviceName: "nginx-hs" # Привязка к Headless сервису
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:stable-alpine
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+        - name: www
+          mountPath: /usr/share/nginx/html
+  # Автоматическое создание дисков для каждого пода
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+```
+
+Пример разыертывания MySQL в StatefulSet:
+
+```yaml
+# Headless Service для стабильного сетевого имени
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+spec:
+  ports:
+  - port: 3306
+  clusterIP: None # Делаем сервис "безголовым"
+  selector:
+    app: mysql
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  serviceName: "mysql"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret-variables
+              key: MYSQL_ROOT_PASSWORD
+              
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: secret-variables
+              key: DB_NAME
+
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: secret-variables
+              key: DB_USER
+
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret-variables
+              key: DB_PASSWORD
+
+        ports:
+        - containerPort: 3306
+          name: mysql
+          
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/mysql # Куда MySQL пишет данные
+          
+        - name: config-mysql
+          mountPath: /etc/mysql/conf.d/
+          
+        - name: init-scripts
+          mountPath: /docker-entrypoint-initdb.d/
+          
+      volumes:
+        - name: init-scripts
+          configMap:
+            name: initsql
+        - name: config-mysql
+          configMap:
+            name: config-mysql
+          
+  # Автоматическое создание диска
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+```
+
+1. **Сетевой адрес**: После запуска этот под будет доступен внутри кластера по адресу `mysql-0.mysql-hs`. Это имя **не изменится**, даже если под переедет на другой узел.
+2. **`volumeClaimTemplates`**: Minikube автоматически создаст виртуальный диск (PVC) размером 1ГБ. Даже если вы удалите StatefulSet командой `kubectl delete`, этот диск **останется**, и ваши данные в `/var/lib/mysql` не пропадут.
+3. **Переменные окружения**: Мы берем пароль из `Secret`, что безопаснее, чем писать его открытым текстом в манифесте.
+4. В `StatefulSet` поле `serviceName` должно **строго совпадать** с `metadata.name` вашего Headless-сервиса.
+
 # DaemonSet 
 
 ##### Это особый контроллер в Kubernetes, чья единственная задача — гарантировать, что **на каждом узле (Node)** кластера запущена ровно одна копия (Pod) определенного приложения.
@@ -157,4 +318,127 @@ spec:
             image: backup:1.0
           restartPolicy: OnFailure
   concurrencyPolicy: Forbid # Не запускать второй, если первый тормозит
+```
+
+---
+
+#### **Autoscaling (HPA - HorizontalPodAutoscaler)** — автоматическое поднятие реплик, в зависимости от нагрузки на сервер
+
+```yml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: my-autoscaling
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: web
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+```
+
+###### Искуственная нагрузка на процессор
+
+```bash
+# Выбираем один из подов нашего деплоймента и грузим его
+kubectl exec -it $(kubectl get pod -l project=rv -o name | head -n 1) -c f1 -- sh -c "while true; do md5sum /dev/urandom; done"
+```
+
+###### Мониторинг hpa
+
+```bash
+kubectl get hpa my-autoscaling --watch
+```
+
+
+---
+
+### Probes - проверки жизни контейнеров внтури подов
+
+- Пробы делает kubelet-агент на каждой ноде
+
+#### Есть 3 вида проб:
+
+- **LivenessProbe** - Постоянно выполняется и следит за жизнью подов
+- **ReadinessProbe** - Проверяет, готов ли под к работе, пока не будет готово, трафик на этот под идти не будет
+- **StartupProbe** - Пока эта проба не пройдет, остальные (Liveness и Readiness) **отключены**.
+
+Примеры:
+
+```yaml
+spec: 
+  containers:
+  - name: Ubuntu
+    image: ubuntu
+    args:
+    - /bin/bash
+    - -c
+    - touch /tmp/healthy; sleep 30; rm -rf /tmp/healthy; sleep 600;
+    livenessProbe: # Постоянная проверка жив ли контейнер
+    readinessProbe: # Проверка когда можно отправлять трафик на контейнер
+      exec: # Exec проверка
+        command: # Command == ENTRYPOINT, args == CMD
+        - cat 
+        - /tmp/healthy
+      tcpSocket: # TCP проверка
+        port: 8001
+      httpGet: # HTTP GET проверка
+        path: /healthcheck
+        port: 8000
+          
+    initialDelaySeconds: 5 # Колличество секунд от старта до пробы
+    periodSeconds: 5 # Длительность времени между двумя проведениями проб
+    timeoutSeconds: 1 # Колличество секунд ожидания пробы
+    successThreshold: 1 # Минимальное колличество последовательных проверок
+    failureThreshold: 3 # Максимальное колличество перезапусков при ошибках
+```
+
+```yaml
+spec:
+  template:
+    spec:
+      containers:
+        - name: {{ .Values.server.name }}
+          image: "{{ .Values.server.image.repository }}:{{ .Values.server.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.server.port }}
+          
+          # 1. Startup Probe: Даем серверу время "проснуться"
+          startupProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.server.port }}
+            failureThreshold: 30 # Даем 30 попыток
+            periodSeconds: 10    # Раз в 10 секунд (итого 5 минут на старт)
+
+          # 2. Readiness Probe: Проверяем доступность базы через роут /
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.server.port }}
+            initialDelaySeconds: 5 # Начать проверку через 5 сек после Startup
+            periodSeconds: 5      # Проверять каждые 5 сек
+            failureThreshold: 3   # Если 3 раза упало — убрать из трафика
+
+          # 3. Liveness Probe: Проверяем, что сервер вообще не завис
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.server.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
 ```

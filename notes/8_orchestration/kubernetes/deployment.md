@@ -174,88 +174,53 @@ spec:
 
 ---
 
-#### **Autoscaling (HPA - HorizontalPodAutoscaler)** — автоматическое поднятие реплик, в зависимости от нагрузки на сервер
+Примеры деплойментов:
 
-```yml
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
+```yaml
+apiVersion: v1
+kind: Service
 metadata:
-  name: my-autoscaling
+  name: server-svc
 spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: web
-  minReplicas: 2
-  maxReplicas: 6
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 70
-    - type: Resource
-      resource:
-        name: memory
-        target:
-          type: Utilization
-          averageUtilization: 80
-```
-
-###### Искуственная нагрузка на процессор
-
-```bash
-# Выбираем один из подов нашего деплоймента и грузим его
-kubectl exec -it $(kubectl get pod -l project=rv -o name | head -n 1) -c f1 -- sh -c "while true; do md5sum /dev/urandom; done"
-```
-
-###### Мониторинг hpa
-
-```bash
-kubectl get hpa my-autoscaling --watch
-```
-
+  selector:
+    app: rent
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
 
 ---
 
-### Probes - проверки жизни контейнеров внтури подов
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server
+  labels:
+    app: js-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rent
+  template:
+    metadata:
+      labels:
+        app: rent
+    spec:
+      containers:
+        - name: rent
+          image: rvlxx/rent:0.1
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - secretRef:
+                name: secret-variables
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5000
 
-- Пробы делает kubelet-агент на каждой ноде
+      imagePullSecrets:
+      - name: registry-secret
 
-#### Есть 3 вида проб:
-
-- LivenessProbe - Постоянно выполняется и следит за жизнью подов
-- ReadinessProbe - Проверяет, готов ли под к работе, пока не будет готово, трафик на этот под идти не будет
-- StartupProbe - Пока эта проба не пройдет, остальные (Liveness и Readiness) **отключены**.
-
-Пример:
-
-```yaml
-...
-spec: 
-  containers:
-  - name: Ubuntu
-    image: ubuntu
-    args:
-    - /bin/bash
-    - -c
-    - touch /tmp/healthy; sleep 30; rm -rf /tmp/healthy; sleep 600;
-    livenessProbe: # Проверка жив ли контейнер
-    readinessProbe: # Проверка когда можно отправлять трафик на контейнер
-      exec: # Exec проверка
-        command: # Command == ENTRYPOINT, args == CMD
-        - cat 
-        - /tmp/healthy
-      tcpSocket: # TCP проверка
-        port: 8001
-      httpGet: # HTTP GET проверка
-        path: /healthcheck
-        port: 8000
-          
-    initialDelaySeconds: 5 # Колличество секунд от старта до пробы
-    periodSeconds: 5 # Длительность времени между двумя проведениями проб
-    timeoutSeconds: 1 # Колличество секунд ожидания пробы
-    successThreshold: 1 # Минимальное колличество последовательных проверок
-    failureThreshold: 3 # Максимальное колличество перезапусков при ошибках
 ```

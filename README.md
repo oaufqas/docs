@@ -11,7 +11,7 @@ My personal DevOps knowledge base. It contains notes, cheat sheets, and useful r
 - [Configuration (Ansible, Saltstack)](./notes/7_configuration/Teory)
 - [Orchestration (K8s, Swarm)](./notes/8_orchestration/Teory)
 - [Virtualization (Proxmbox, Kvm, Vagrant)](./notes/9_virtualization)
-- [Monitoring (Prometheus, Grafana, Victoriametrics, Zabbix, Logging)](./notes/10_monitoring)
+- [Monitoring (Prometheus, Grafana, Victoriametrics, Zabbix, Logging)](./notes/10_monitoring/Teory)
 - [Infrastructure (Terraform)](./notes/11_infrastructure)
 - [Clouds (Yandex, AWS)](./notes/12_clouds)
 - [Theory (DevOps, SRE)](./notes/13_theory)

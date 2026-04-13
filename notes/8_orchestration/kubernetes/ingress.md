@@ -95,9 +95,10 @@ kind: Ingress
 metadata:
   name: my-app-ingress
   annotations:
-    # Указываем, какой контроллер должен обрабатывать этот Ingress
-    kubernetes.io/ingress.class: nginx 
+    kubernetes.io/ingress.class: nginx # Устарело
 spec:
+    # Указываем, какой контроллер должен обрабатывать этот Ingress
+  ingressClassName: nginx
   rules:
   - host: my-app.example.com
     http:
@@ -119,11 +120,10 @@ kind: Ingress
 metadata:
   name: main-ingress
   annotations:
-    # Указываем, какой контроллер должен обработать этот конфиг
-    kubernetes.io/ingress.class: "nginx"
     # Полезная аннотация для перенаправления на SSL (если есть сертификат)
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
+  ingressClassName: nignx
   rules:
   - host: myapp.com             # 1. Проверка домена
     http:
@@ -187,3 +187,4 @@ spec:
 
 - `kubectl get ingress` — посмотреть внешние адреса.
 - `kubectl describe ingress <name>` — если Ingress не работает, тут будет видно, нашел ли он нужный Service.
+- `kubectl get ingressclass` — посмотреть ingress controllers
