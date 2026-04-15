@@ -34,7 +34,7 @@
 
 ---
 
-Пример логики в конфиге
+Пример логики в конфиге:
 
 ```yaml
 route:
@@ -47,4 +47,36 @@ route:
   - match:
       severity: 'critical'         # Если алерт критический...
     receiver: 'pager-duty-sms'     # ...шлем SMS
+```
+
+Типовые алерты:
+
+```yaml
+# Высокая нагрузка на CPU
+- alert: HighCPUUsage
+  expr: (100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 80
+  for: 10m
+  annotations:
+    summary: "High CPU usage on {{ $labels.instance }}"
+
+# Диск почти заполнен
+- alert: DiskSpaceLow
+  expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 10
+  for: 5m
+  annotations:
+    summary: "Disk space low on {{ $labels.instance }}"
+
+# Сервис недоступен
+- alert: ServiceDown
+  expr: up{job="myapp"} == 0
+  for: 1m
+  annotations:
+    summary: "Service {{ $labels.job }} is down"
+
+# Много 5xx ошибок
+- alert: HighErrorRate
+  expr: (sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))) * 100 > 5
+  for: 5m
+  annotations:
+    summary: "High error rate on {{ $labels.instance }}"
 ```

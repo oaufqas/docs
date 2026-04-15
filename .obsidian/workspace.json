@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/10_monitoring/Teory.md",
+                "file": "notes/9_infrastructure/Teory.md",
                 "mode": "source",
                 "source": false
               },
@@ -94,8 +94,8 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "notes/8_orchestration/kubernetes/pods.md",
-                "collapseAll": false,
+                "file": "notes/9_infrastructure/Teory.md",
+                "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
                 "showSearch": false,
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Обратные ссылки для pods"
+              "title": "Backlinks for Teory"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "notes/8_orchestration/kubernetes/pods.md",
+                "file": "notes/9_infrastructure/Teory.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Исходящие ссылки из pods"
+              "title": "Outgoing links from Teory"
             }
           },
           {
@@ -166,7 +166,7 @@
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -186,32 +186,33 @@
   },
   "active": "cceb28b9e0230a59",
   "lastOpenFiles": [
-    "notes/10_monitoring/prometheus/basics.md",
-    "notes/10_monitoring/prometheus/alertmanager.md",
-    "notes/10_monitoring/grafana/alerts.md",
-    "notes/10_monitoring/Teory.md",
-    "notes/10_monitoring/grafana/basics.md",
-    "images/Pasted image 20260412205041.png",
-    "notes/10_monitoring/grafana/datasources.md",
-    "notes/10_monitoring/grafana/dashboards.md",
-    "notes/10_monitoring/prometheus/exporters.md",
-    "notes/10_monitoring/prometheus/promql.md",
-    "notes/8_orchestration/kubernetes/deployment.md",
-    "notes/8_orchestration/kubernetes/helm.md",
-    "notes/8_orchestration/kubernetes/other-essence.md",
-    "notes/8_orchestration/kubernetes/configmaps-secrets.md",
-    "notes/8_orchestration/kubernetes/architecture.md",
-    "notes/8_orchestration/kubernetes/ingress.md",
-    "notes/8_orchestration/kubernetes/installation.md",
-    "notes/8_orchestration/kubernetes/kubectl.md",
-    "notes/8_orchestration/kubernetes/minikube.md",
-    "notes/8_orchestration/kubernetes/monitoring.md",
-    "notes/8_orchestration/kubernetes/pods.md",
-    "notes/8_orchestration/kubernetes/rbac.md",
-    "notes/8_orchestration/kubernetes/services.md",
-    "notes/8_orchestration/kubernetes/troubleshooting.md",
-    "notes/8_orchestration/kubernetes/volumes.md",
+    "notes/7_configuration/ansible/myplaybooks/rent.yml.md",
+    "notes/7_configuration/ansible/basics.md",
+    "notes/9_infrastructure/Teory.md",
     "README.md",
+    "notes/9_infrastructure/terraform/best-practices.md",
+    "notes/9_infrastructure/terraform/providers.md",
+    "notes/9_infrastructure/terraform/modules.md",
+    "notes/9_infrastructure/terraform/installation.md",
+    "notes/9_infrastructure/terraform/workspaces.md",
+    "notes/9_infrastructure/terraform/state.md",
+    "notes/9_infrastructure/terraform/commands.md",
+    "notes/11_monitoring/Teory.md",
+    "notes/10_monitoring/Untitled.md",
+    "notes/11_monitoring/grafana/basics.md",
+    "notes/11_monitoring/grafana/alerts.md",
+    "notes/11_monitoring/grafana/dashboards.md",
+    "notes/11_monitoring/grafana/datasources.md",
+    "notes/11_monitoring/logging/loki.md",
+    "notes/11_monitoring/logging/elastic-stack.md",
+    "notes/11_monitoring/prometheus/alertmanager.md",
+    "notes/11_monitoring/prometheus/basics.md",
+    "notes/11_monitoring/victoriametrics/basics.md",
+    "commands/powershell-comands.md",
+    "commands/git-commands.md",
+    "commands/cmd-commands.md",
+    "notes/11_monitoring/prometheus/exporters.md",
+    "images/Pasted image 20260412205041.png",
     "images/Pasted image 20260410172017.png",
     "images/Pasted image 20260410171650.png",
     "images/Pasted image 20260410171634.png",
