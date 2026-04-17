@@ -144,7 +144,7 @@ spec:
               number: 80
 ```
 
-За что отвечают поля (подробно)
+За что отвечают поля
 
 1. **`annotations`**: Это «инструкции» для контроллера. Например, через них настраиваются лимиты (Rate Limit), таймауты, базовое шифрование (Basic Auth) или работа с сертификатами Let's Encrypt.
 2. **`host`**: Ingress смотрит на HTTP-заголовок `Host` в запросе. Если пришел запрос на `other-app.com`, а в правилах только `myapp.com`, контроллер выдаст 404.
@@ -182,6 +182,146 @@ spec:
     - myapp.com
     secretName: myapp-tls-secret # Имя Secret, где лежат сертификат и ключ
 ```
+
+
+---
+
+### SSL certificates let's Encrypt
+
+Установка cert-manager c плагином Yandex Cloud DNS ACME webhook
+
+```bash
+helm pull oci://cr.yandex/yc-marketplace/yandex-cloud/cert-manager-webhook-yandex/cert-manager-webhook-yandex \ 
+--version 1.0.9 \ 
+--untar && \ 
+helm install \ 
+--namespace <пространство_имен> \ 
+--create-namespace \ 
+--set-file config.auth.json=key.json \ 
+--set config.email='<адрес_электронной_почты_для_уведомлений_от_Lets_Encrypt>' \ 
+--set config.folder_id='<идентификатор_каталога_с_зоной_Cloud_DNS>' \ 
+--set config.server='URL_сервера_Lets_Encrypt' \ 
+# https://acme-staging-v02.api.letsencrypt.org/directory Тестовый URL
+# https://acme-v02.api.letsencrypt.org/directory Основной URL
+cert-manager-webhook-yandex ./cert-manager-webhook-yandex/
+```
+
+Получение тестового сертификата:
+
+```yaml
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: domain-name
+  namespace: <пространство_имен>
+spec:
+  secretName: domain-name-secret
+  issuerRef:
+    # ClusterIssuer, созданный вместе с Yandex Cloud DNS ACME webhook.
+    name: yc-clusterissuer
+    kind: ClusterIssuer
+  dnsNames:
+    # Домен должен входить в вашу публичную зону Cloud DNS.
+    # Указывается имя домена (например, test.example.com), а не имя DNS-записи.
+    - <имя_домена>
+```
+
+Результат должен быть:
+
+```bash
+kubectl get certificate
+
+
+NAME         READY  SECRET              AGE
+domain-name  True   domain-name-secret  45m
+```
+
+Получение сертификата:
+
+```yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: http01-clusterissuer
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: <электронная_почта_для_уведомлений_от_Lets_Encrypt>
+    privateKeySecretRef:
+      name: http01-clusterissuer-secret
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+```
+
+Объекты для проверки cert-manager:
+
+```yaml
+apiVersion: networking.k8s.io/v1 
+kind: Ingress 
+metadata: 
+  name: minimal-ingress 
+  annotations: cert-manager.io/cluster-issuer: "http01-clusterissuer" 
+spec: 
+  ingressClassName: nginx 
+  tls: 
+    - hosts: 
+      - <URL_адрес_вашего_домена> 
+      secretName: domain-name-secret 
+  rules: 
+    - host: <URL_адрес_вашего_домена> 
+      http:
+        paths: 
+        - path: / 
+          pathType: Prefix 
+          backend: 
+            service: 
+              name: app 
+              port: number: 80 
+   
+--- 
+
+apiVersion: v1 
+kind: Service 
+metadata: 
+  name: app 
+spec: 
+  selector: 
+    app: app 
+  ports: 
+  - protocol: TCP 
+    port: 80 
+    targetPort: 80 
+    
+---
+
+apiVersion: apps/v1 
+kind: Deployment 
+metadata: 
+  name: app-deployment 
+  labels: 
+    app: app 
+spec: 
+  replicas: 1 
+  selector: 
+    matchLabels: 
+      app: app 
+  template: 
+    metadata: 
+      labels: 
+      app: app 
+    spec: 
+      containers: 
+        - name: app 
+          image: nginx:latest 
+          ports:
+            - containerPort: 80
+
+```
+
+
+---
 
 Полезные команды
 

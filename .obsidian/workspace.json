@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "ba4acde2d9c98225",
+        "id": "3107beb5806a5ed8",
         "type": "tabs",
         "children": [
           {
-            "id": "cceb28b9e0230a59",
+            "id": "9691f750422d0a32",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/9_infrastructure/Teory.md",
+                "file": "notes/9_infrastructure/terraform/state.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Teory"
+              "title": "state"
             }
           }
         ]
@@ -184,34 +184,34 @@
       "bases:Create new base": false
     }
   },
-  "active": "cceb28b9e0230a59",
+  "active": "9691f750422d0a32",
   "lastOpenFiles": [
-    "notes/7_configuration/ansible/myplaybooks/rent.yml.md",
-    "notes/7_configuration/ansible/basics.md",
     "notes/9_infrastructure/Teory.md",
-    "README.md",
     "notes/9_infrastructure/terraform/best-practices.md",
-    "notes/9_infrastructure/terraform/providers.md",
-    "notes/9_infrastructure/terraform/modules.md",
-    "notes/9_infrastructure/terraform/installation.md",
+    "notes/9_infrastructure/terraform/hcl-syntax.md",
     "notes/9_infrastructure/terraform/workspaces.md",
     "notes/9_infrastructure/terraform/state.md",
+    "notes/9_infrastructure/terraform/providers.md",
+    "notes/9_infrastructure/terraform/installation.md",
+    "notes/9_infrastructure/terraform/examples.md",
     "notes/9_infrastructure/terraform/commands.md",
+    "notes/12_clouds/yandex-cloud/managed-k8s.md",
+    "notes/8_orchestration/kubernetes/ingress.md",
+    "notes/9_infrastructure/terraform/modules.md",
+    "notes/12_clouds/Teory.md",
+    "README.md",
     "notes/11_monitoring/Teory.md",
-    "notes/10_monitoring/Untitled.md",
-    "notes/11_monitoring/grafana/basics.md",
-    "notes/11_monitoring/grafana/alerts.md",
-    "notes/11_monitoring/grafana/dashboards.md",
-    "notes/11_monitoring/grafana/datasources.md",
-    "notes/11_monitoring/logging/loki.md",
-    "notes/11_monitoring/logging/elastic-stack.md",
-    "notes/11_monitoring/prometheus/alertmanager.md",
-    "notes/11_monitoring/prometheus/basics.md",
-    "notes/11_monitoring/victoriametrics/basics.md",
-    "commands/powershell-comands.md",
-    "commands/git-commands.md",
-    "commands/cmd-commands.md",
-    "notes/11_monitoring/prometheus/exporters.md",
+    "notes/12_clouds/yandex-cloud/s3.md",
+    "notes/12_clouds/yandex-cloud/compute.md",
+    "notes/12_clouds/yandex-cloud/databases.md",
+    "notes/12_clouds/yandex-cloud/cli.md",
+    "notes/12_clouds/aws/rds.md",
+    "notes/8_orchestration/docker-swarm/basics.md",
+    "notes/14_scripts/useful-aliases.md",
+    "notes/7_configuration/ansible/full_ansible_project/group_vars/all/main.yml.md",
+    "notes/7_configuration/ansible/installation.md",
+    "notes/7_configuration/ansible/basics.md",
+    "notes/7_configuration/ansible/myplaybooks/rent.yml.md",
     "images/Pasted image 20260412205041.png",
     "images/Pasted image 20260410172017.png",
     "images/Pasted image 20260410171650.png",
