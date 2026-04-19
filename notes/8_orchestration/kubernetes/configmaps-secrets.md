@@ -114,8 +114,6 @@ spec:
 
 
 
-
-
 --- # 2 вариант
   
 apiVersion: v1
@@ -147,10 +145,26 @@ spec:
         secretKeyRef:
           name: secret-stringdata
           key: password
+          
+          
+--- # 3 Registy secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: registry-secret
+type: kubernetes.io/dockerconfigjson
+data:
+  # Это base64 от конфига Docker
+  .dockerconfigjson: <закодированная строка>
+
 ```
 
 
 Команды для работы с секретами:
+
+```bash
+echo -n '{"auths":{"https://index.docker.io/v1/":{"username":"username","password":"pass","auth":"'$(echo -n "username:pass" | base64)'"}}}' | base64 -w 0
+```
 
 ```bash
 # Создать секрет из файлов командой:

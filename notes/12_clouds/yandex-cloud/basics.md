@@ -1,0 +1,5 @@
+[[cli]]
+[[compute]]
+[[databases]]
+[[managed-k8s]]
+[[notes/12_clouds/yandex-cloud/s3]]

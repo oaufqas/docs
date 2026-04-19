@@ -11,3 +11,19 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashi
 sudo apt update && sudo apt install terraform
 
 ```
+
+#### Официальный registry Terraform в России недоступен, поэтому необходимо использование зеркала:
+
+По пути `~/` создать файл `.terraformrc`:
+
+```hcl
+provider_installation {
+  network_mirror {
+    url = "https://terraform-mirror.yandexcloud.net/"
+    include = ["registry.terraform.io/*/*"]
+  }
+  direct {
+    exclude = ["registry.terraform.io/*/*"]
+  }
+}
+```

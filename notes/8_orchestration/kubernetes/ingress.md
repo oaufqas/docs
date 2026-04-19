@@ -1,5 +1,6 @@
 **Ingress-контроллер** — это специализированный балансировщик нагрузки и прокси-сервер, который управляет **внешним доступом** к сервисам внутри кластера Kubernetes. 
 
+**[[managed-k8s#5. Установка ingress controller|Установка Ingress controller в Yandex Cloud]]**
 ### Как это работает
 
 В Kubernetes есть два понятия, которые часто путают:
@@ -188,55 +189,34 @@ spec:
 
 ### SSL certificates let's Encrypt
 
-Установка cert-manager c плагином Yandex Cloud DNS ACME webhook
+Установка cert-manager c плагином Yandex Cloud DNS ACME webhook.
+
 
 ```bash
-helm pull oci://cr.yandex/yc-marketplace/yandex-cloud/cert-manager-webhook-yandex/cert-manager-webhook-yandex \ 
---version 1.0.9 \ 
---untar && \ 
-helm install \ 
---namespace <пространство_имен> \ 
---create-namespace \ 
---set-file config.auth.json=key.json \ 
---set config.email='<адрес_электронной_почты_для_уведомлений_от_Lets_Encrypt>' \ 
---set config.folder_id='<идентификатор_каталога_с_зоной_Cloud_DNS>' \ 
---set config.server='URL_сервера_Lets_Encrypt' \ 
-# https://acme-staging-v02.api.letsencrypt.org/directory Тестовый URL
-# https://acme-v02.api.letsencrypt.org/directory Основной URL
-cert-manager-webhook-yandex ./cert-manager-webhook-yandex/
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.12.1/cert-manager.yaml
+
+# или вариант через halm: 
+
+helm repo add jetstack https://charts.jetstack.io --force-update
+helm repo update
+helm install cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --set installCRDs=true [citation:3][citation:10]
+
+
+# Проверить наличие подов для проверки домена
+kubectl get pods -n cert-manager
+
+# Вывод должен быть:
+# NAME                                      READY  STATUS   RESTARTS  AGE
+# cert-manager-69********-ghw6s             1/1    Running  0         54s
+# cert-manager-cainjector-76********-gnrzz  1/1    Running  0         55s
+# cert-manager-webhook-77********-wz9bh     1/1    Running  0         54s
+
 ```
 
-Получение тестового сертификата:
-
-```yaml
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: domain-name
-  namespace: <пространство_имен>
-spec:
-  secretName: domain-name-secret
-  issuerRef:
-    # ClusterIssuer, созданный вместе с Yandex Cloud DNS ACME webhook.
-    name: yc-clusterissuer
-    kind: ClusterIssuer
-  dnsNames:
-    # Домен должен входить в вашу публичную зону Cloud DNS.
-    # Указывается имя домена (например, test.example.com), а не имя DNS-записи.
-    - <имя_домена>
-```
-
-Результат должен быть:
-
-```bash
-kubectl get certificate
-
-
-NAME         READY  SECRET              AGE
-domain-name  True   domain-name-secret  45m
-```
-
-Получение сертификата:
+Создание ClusterIssuer, Certificate, IngressController, с помощью которых выпукаются сертификаты:
 
 ```yaml
 apiVersion: cert-manager.io/v1
@@ -245,7 +225,8 @@ metadata:
   name: http01-clusterissuer
 spec:
   acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
+    server: https://acme-v02.api.letsencrypt.org/directory # prod
+            https://acme-staging-v02.api.letsencrypt.org/directory # test
     email: <электронная_почта_для_уведомлений_от_Lets_Encrypt>
     privateKeySecretRef:
       name: http01-clusterissuer-secret
@@ -253,6 +234,38 @@ spec:
     - http01:
         ingress:
           class: nginx
+          
+---
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.global.domain }}-tls
+  namespace: {{ .Release.Namespace }}
+spec:
+  secretName: {{ .Values.global.domain }}-tls-secret
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: {{ .Values.global.domain }}
+  dnsNames:
+  - {{ .Values.global.domain }}
+  - www.{{ .Values.global.domain }}
+    
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - {{ .Values.global.domain }}
+    - www.{{ .Values.global.domain }}
+    secretName: {{ .Values.global.domain }}-tls-secret # <-- Имя секрета из Certificate
+  rules:
 ```
 
 Объекты для проверки cert-manager:
@@ -320,6 +333,32 @@ spec:
 
 ```
 
+Команды для проверки
+
+```bash
+# Проверка работоспособности TLS
+kubectl describe certificate <cert-name>
+
+# Вывод:
+# Events:
+#   Type    Reason     Age   From                                       Message
+#   ----    ------     ----  ----                                       -------
+#   Normal  Issuing    ...   cert-manager-certificates-trigger          Issuing certificate as Secret does not exist
+#   Normal  Generated  ...   cert-manager-certificates-key-manager      Stored new # private key in temporary Secret resource...
+
+# Если все работает, можно удалить тестовые поды:
+kubectl delete -f ssl-test.yaml
+```
+
+---
+
+#### Сертификаты можно выпускать только 5 раз в неделю из-за строгих ограничеий Lets Encrypt
+
+```error
+Warning Failed 19m cert-manager-certificates-issuing The certificate request has failed to complete and will be retried: Failed to wait for order resource "tls-1-1388556169" to become ready: order is in "errored" state: Failed to create Order: 429 urn:ietf:params:acme:error:rateLimited: too many certificates (5) already issued for this exact set of identifiers in the last 168h0m0s, retry after 2026-04-20 00:09:26 UTC
+```
+
+Такая ошибка после команды `kubectl describe certificate <name>`, означает что ssl серты для текущего домена заблокированы на неделю, и в ClusterIssuer нужно использовать тестовый сервер проверки домена: `https://acme-staging-v02.api.letsencrypt.org/directory`
 
 ---
 
@@ -328,3 +367,4 @@ spec:
 - `kubectl get ingress` — посмотреть внешние адреса.
 - `kubectl describe ingress <name>` — если Ingress не работает, тут будет видно, нашел ли он нужный Service.
 - `kubectl get ingressclass` — посмотреть ingress controllers
+- `kubectl describe certificate <name>` 
