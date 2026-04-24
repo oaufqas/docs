@@ -54,9 +54,15 @@ count = var.create_server ? 1 : 0
 - **Count:** простой счетчик (`count = 3` создаст 3 одинаковых ресурса).
 - **For_each:** итерация по списку или карте (более продвинутый способ, позволяет обращаться к каждому элементу через `each.key` и `each.value`).
 
+```hcl
+output "ip" {
+  value = [for vm in yandex_compute_instance.vm : vm.network_interface.0.nat_ip_address]
+}
+```
+
 ---
 
-### Синтаксис Terraform
+## Синтаксис Terraform
 
 Синтаксис Terraform — это структура конкретных блоков, из которых строится инфраструктура. Основное:
 
@@ -180,6 +186,39 @@ locals {
   common_tags = {
     Owner   = "DevOps"
     Project = local.project_name
+  }
+}
+```
+
+
+---
+
+### Примеры
+
+Создание дисков для бд и файлов в yandex
+
+```hcl
+resource "yandex_compute_disk" "db_disk" {
+  name       = "k8s-db-disk"
+  type       = "network-ssd"
+  zone       = var.zone
+  size       = 10
+  block_size = 4096
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+# Диск для общих файлов приложения (uploads)
+resource "yandex_compute_disk" "app_uploads_disk" {
+  name       = "k8s-app-uploads-disk"
+  type       = "network-hdd"
+  zone       = var.zone
+  size       = 20
+
+  lifecycle {
+    prevent_destroy = true
   }
 }
 ```

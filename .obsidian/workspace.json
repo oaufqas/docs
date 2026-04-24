@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/12_clouds/yandex-cloud/iam.md",
+                "file": "notes/9_infrastructure/terraform/hcl-syntax.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "iam"
+              "title": "hcl-syntax"
             }
           }
         ]
@@ -186,32 +186,32 @@
   },
   "active": "9691f750422d0a32",
   "lastOpenFiles": [
+    "notes/8_orchestration/kubernetes/ingress.md",
+    "notes/8_orchestration/kubernetes/helm.md",
+    "notes/8_orchestration/kubernetes/volumes.md",
+    "notes/12_clouds/yandex-cloud/basics.md",
+    "notes/8_orchestration/kubernetes/architecture.md",
+    "notes/12_clouds/yandex-cloud/managed-k8s.md",
+    "notes/12_clouds/yandex-cloud/s3.md",
+    "notes/8_orchestration/kubernetes/other-essence.md",
+    "notes/8_orchestration/kubernetes/deployment.md",
+    "notes/9_infrastructure/terraform/hcl-syntax.md",
+    "notes/12_clouds/yandex-cloud/iam.md",
     "notes/8_orchestration/kubernetes/services.md",
     "notes/8_orchestration/kubernetes/rbac.md",
     "notes/8_orchestration/kubernetes/pods.md",
-    "notes/8_orchestration/kubernetes/other-essence.md",
     "notes/8_orchestration/kubernetes/monitoring.md",
     "notes/8_orchestration/kubernetes/kubectl.md",
     "notes/8_orchestration/kubernetes/minikube.md",
     "notes/8_orchestration/kubernetes/configmaps-secrets.md",
-    "notes/8_orchestration/kubernetes/deployment.md",
-    "notes/8_orchestration/kubernetes/helm.md",
-    "notes/8_orchestration/kubernetes/ingress.md",
     "notes/8_orchestration/kubernetes/installation.md",
-    "notes/8_orchestration/kubernetes/architecture.md",
     "notes/9_infrastructure/terraform/examples.md",
-    "notes/9_infrastructure/terraform/hcl-syntax.md",
     "notes/9_infrastructure/Teory.md",
     "notes/9_infrastructure/terraform/workspaces.md",
     "notes/9_infrastructure/terraform/modules.md",
     "notes/9_infrastructure/terraform/installation.md",
     "notes/9_infrastructure/terraform/commands.md",
     "notes/9_infrastructure/terraform/best-practices.md",
-    "notes/9_infrastructure/terraform/state.md",
-    "notes/9_infrastructure/terraform/providers.md",
-    "notes/12_clouds/Teory.md",
-    "notes/12_clouds/yandex-cloud/databases.md",
-    "notes/12_clouds/yandex-cloud/compute.md",
     "notes/9_infrastructure/Untitled.base",
     "images/Pasted image 20260412205041.png",
     "images/Pasted image 20260410172017.png",

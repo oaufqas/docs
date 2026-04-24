@@ -360,6 +360,27 @@ Warning Failed 19m cert-manager-certificates-issuing The certificate request has
 
 Такая ошибка после команды `kubectl describe certificate <name>`, означает что ssl серты для текущего домена заблокированы на неделю, и в ClusterIssuer нужно использовать тестовый сервер проверки домена: `https://acme-staging-v02.api.letsencrypt.org/directory`
 
+
+#### У nginx-ingress-controller по умолчанию ограничение на размер даты запросов
+
+Увеличить ограничение:
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-ingress
+  annotations:
+    # Увеличиваем лимит загрузки (например, до 100 МБ)
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    # Если вы используете cert-manager, другие аннотации остаются на месте
+    cert-manager.io/cluster-issuer: "http01-clusterissuer"
+spec:
+  ingressClassName: nginx
+  # ... остальная часть манифеста ...
+
+```
+
 ---
 
 Полезные команды
