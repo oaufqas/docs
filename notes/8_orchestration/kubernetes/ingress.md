@@ -194,17 +194,11 @@ spec:
 
 ```bash
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.12.1/cert-manager.yaml
+```
 
-# или вариант через halm: 
+[[helm#Установка Cert-manager|Вариант через Helm]]
 
-helm repo add jetstack https://charts.jetstack.io --force-update
-helm repo update
-helm install cert-manager jetstack/cert-manager \
-  --namespace cert-manager \
-  --create-namespace \
-  --set installCRDs=true [citation:3][citation:10]
-
-
+```
 # Проверить наличие подов для проверки домена
 kubectl get pods -n cert-manager
 

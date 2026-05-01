@@ -139,3 +139,52 @@ metadata:
 - `.Release`: `.Release.Namespace`, `.Release.IsInstall`, `.Release.IsUpgrade`.
 - `.Capabilities`: информация о версии Kubernetes (чтобы понимать, поддерживается ли Ingress V1).
 - `.Files`: позволяет прочитать содержимое любого файла в чарте (например, `{{ .Files.Get "config.json" }}`).
+
+
+---
+
+#### Установка Ingress-nginx: 
+
+```bash
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx && \ 
+helm repo update && \ 
+helm install ingress-nginx ingress-nginx/ingress-nginx
+# --set controller.service.loadBalancerIP=<ip_addr> Прокинуть в ингресс уже существующий ip адресс
+```
+
+#### Установка Cert-manager:
+
+```bash
+helm repo add jetstack https://charts.jetstack.io --force-update
+helm repo update
+helm install cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --set installCRDs=true [citation:3][citation:10]
+```
+
+#### Установка HashiCorp-Vault:
+
+```bash
+helm repo add hashicorp https://helm.releases.hashicorp.com
+helm install vault hashicorp/vault --set "server.dev.enabled=true"
+
+# Yandex зеркало
+helm pull oci://cr.yandex/yc-marketplace/yandex-cloud/vault/chart/vault \ 
+--version 0.28.1+yckms \ 
+--untar
+```
+
+#### Установка Nfs сервера ([[examples|установка в terraform]]):
+
+```bash
+# В облаках важна правильная настройка сервера при установке
+
+helm repo add nfs-ganesha https://kubernetes-sigs.github.io/nfs-ganesha-server-and-external-provisioner
+
+helm install nfs-ganesha \ 
+nfs-ganesha/nfs-server-provisioner \
+--set persistence.enabled=true \
+--set persistence.storageClass="yc-network-hdd" \
+--set persistence.size=10Gi
+```

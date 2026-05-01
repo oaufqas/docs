@@ -12,7 +12,6 @@ terraform {
   }
 }
 
-
 provider "yandex" {
   token     = var.token
   cloud_id  = var.cloud_id
@@ -29,6 +28,8 @@ provider "helm" {
   }
 }
 
+
+
 resource "yandex_vpc_network" "k8s-network" {
   name = "k8s-network"
 }
@@ -44,6 +45,7 @@ resource "yandex_vpc_subnet" "k8s-subnet" {
   name           = "k8s-subnet"
   network_id     = yandex_vpc_network.k8s-network.id
   v4_cidr_blocks = ["192.168.10.0/24"]
+  zone           = var.zone
 }
 
 resource "yandex_iam_service_account" "k8s-sa" {
@@ -110,6 +112,12 @@ resource "yandex_kubernetes_node_group" "nodes" {
       size = 2
     }
   }
+
+  allocation_policy {
+    location {
+      zone = var.zone
+    }
+  }
 }
 
 resource "helm_release" "ingress-nginx" {
@@ -132,12 +140,12 @@ resource "helm_release" "ingress-nginx" {
 
 resource "helm_release" "cert_manager" {
   name             = "cert-manager"
-  repository       = "https://charts.jetstack.io"
+  repository       = "oci://quay.io/jetstack/charts"
   chart            = "cert-manager"
   namespace        = "cert-manager"
   create_namespace = true
-  version          = "v1.14.0"
-  
+  version          = "v1.16.1"
+
   set = [
     {
       name  = "installCRDs"
@@ -147,6 +155,31 @@ resource "helm_release" "cert_manager" {
   depends_on = [
     yandex_kubernetes_cluster.k8s-cluster
   ]
+}
+
+resource "helm_release" "nfs_server" {
+  name             = "nfs-server-provisioner"
+  repository       = "https://kubernetes-sigs.github.io/nfs-ganesha-server-and-external-provisioner"
+  chart            = "nfs-server-provisioner"
+  namespace        = "nfs-system"
+  create_namespace = true
+
+  set = [{
+    name  = "persistence.enabled"
+    value = "true"
+    },
+    {
+      name  = "persistence.size"
+      value = "4Gi"
+    },
+    {
+      name  = "persistence.storageClass"
+      value = "yc-network-hdd"
+    },
+    {
+      name  = "storageClass.name"
+      value = "nfs"
+  }]
 }
 
 output "ingress_external_ip" {

@@ -41,16 +41,7 @@
 yc managed-kubernetes cluster get-credentials --id <ID_КЛАСТЕРА> --external
 ```
 
-#### 5. Установка ingress controller
-
-Самая простая установка ingress - через helm: 
-
-```bash
-helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx && \ 
-helm repo update && \ 
-helm install ingress-nginx ingress-nginx/ingress-nginx
-# --set controller.service.loadBalancerIP=<ip_addr> Прокинуть в ингресс уже существующий ip адресс
-```
+#### 5. [[helm#Установка Ingress-nginx|Установка ingress controller]]
 
 #### 6. [[ingress#SSL certificates let's Encrypt|Настройка SSL сертификатов]]
 
