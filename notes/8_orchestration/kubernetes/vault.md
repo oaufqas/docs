@@ -74,12 +74,58 @@ vault status # Вывод должен быть:
 vault operator init --key-shares=<на сколько разделить> --key-threshold=<сколько кусков нужно>
 
 vault operator unseal # <key-threshold> раз с разными ключами
+
+vault secrets enable -path=secret kv-v2 # Включаем хранилище kv-v2
 ```
 
 
 ---
 
-### Настройка Vault для работы в Kubernetes
+### Настройка Vault для работы в Kubernetes, основные способы:
+
+Вообще самых частых около 5, сам пощупал только 2:
+
+1. External Secrets Operator
+	
+2. HashiСorp Vault Agent Injector
+
+Остальные:
+
+3. HashiСorp Vault Secrets Operator
+    
+4. HashiСorp Vault CSI Provider
+    
+5. Bank-Vaults Secret Injection Webhook
+
+## External Secrets Operator (eso)
+
+External Secrets Operator интегрируется с Vault. Работает он относительно просто. Создается SecretStore, который провайдит секреты из vault для ExternalSecrets, которые преобразовываются в нативные kubernetes secret, которые и можно использовать в подах.
+
+```bash
+helm install external-secrets external-secrets/external-secrets \
+--namespace external-secrets \
+--create-namespace \
+--set installCRDs=true # Обязательно к установке
+```
+
+Мы его установили, и у нас появились три пода, которые отвечают за синхронизацию секретов. 
+
+```text
+eso-cert-controller-...-...
+eso-...-...
+eso-webhook-...-...
+```
+
+Для аутентификации в vault, нужно создать ServiceAccount в кубере, включить нужный метод аутентификации в vault и прокинуть туда конфиг подключения к куберу.
+
+```yaml
+# Создание SA для eso
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eso-sa
+  namespace: default
+```
 
 ```bash
 # 1. Включаем метод авторизации
@@ -88,22 +134,110 @@ vault auth enable kubernetes
 # 2. Настраиваем связь с API кластера
 # Внутри пода Vault переменные $KUBERNETES_... доступны автоматически
 vault write auth/kubernetes/config \
-    kubernetes_host="https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT"
+    token_reviewer_jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+    kubernetes_host="https://${KUBERNETES_PORT_443_TCP_ADDR}:443" \
+    kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
 ```
 
-Создание секретов в разных «папках», разделим данные физически по путям:
+Следующий этап, это создание политики и роли в vault, политика дает определенные разрешения на работу с секретами в vault, а роль
+Написание политики (Policies) — кто что видит:
+
+**Файл `policy.hcl`:**
+
+```hcl
+path "secret/data/app/*" {
+  capabilities = ["read"]
+}
+```
+
+Загружаем их в Vault:  
+`vault policy write app-policy policy.hcl`
+
+```bash
+# Создание роли для eso
+vault write auth/kubernetes/role/eso-role \
+    bound_service_account_names=vault-sa \
+    bound_service_account_namespaces=default \
+    policies=app-policy \
+    ttl=1h
+```
+
+И последнее, это создание самих k8s сущностей (SecretStore, ExternalSecrets) и подключение созданных, благодаря им, секретам к подам.
+
+```yaml
+apiVersion: external-secrets.io/v1
+kind: SecretStore
+metadata:
+  name: vault-store
+spec:
+  provider:
+    vault:
+      server: "http://vault.vault.svc.cluster.local:8200"
+      path: "secret"
+      version: "v2"
+      auth: 
+        kubernetes:
+          role: "eso-role" # Роль созданная в vault
+          mountPath: "kubernetes"
+          serviceAccountRef:
+            name: vault-sa # ServiceAccount eso
+
+---
+
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: server-values # Имя сущности ExternalSecret
+spec:
+  refreshInterval: "1h"
+  secretStoreRef:
+    name: vault-store # Имя SecretStore
+    kind: SecretStore
+  target:
+    name: {{ .Values.server.appsecret }} # Имя secret, подключаемого к подам
+  dataFrom: # Вытащить все секреты из SecretStore, без изменения имен
+  - extract:
+      key: "secret/app/server-values" # Путь к секрету в vault
+```
+
+Созданные секреты монтируются к подам [[configmaps-secrets#2. Secret (Конфиденциальные данные)|как обычно]]
+
+
+## HashiСorp Vault Agent Injector
+
+HashiСorp Vault Agent Injector устанавливается как часть основного чарта Vault (через параметр enabled=true и сопутствующие настройки). В кластере он разворачивается как обычный webhook.
+ 
+ К поду подключается второй контейнер — vault-agent. Init-контейнер завершает работу, а vault-agent продолжает жить вместе с подом и следит за тем, чтобы содержимое в /mnt/secret всегда было актуальным, регулярно обновляя его.
+
+**Важно:** vault-agent по умолчанию стартует с достаточно большими запросами ресурсов.
+
+Что и куда монтировать задаётся в аннотациях пода: указывается путь, имя файла и секрет. Также адрес сервиса, путь аутентификации (AuthPath), роль и сервисный аккаунт, указанный в поде. Через аннотацию agent-inject-secret можно, например, задать -all.txt — это будет имя итогового файла.
+
+```bash
+# 1. Включаем метод авторизации
+vault auth enable kubernetes
+
+# 2. Настраиваем связь с API кластера
+# Внутри пода Vault переменные $KUBERNETES_... доступны автоматически
+vault write auth/kubernetes/config \
+    token_reviewer_jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+    kubernetes_host="https://${KUBERNETES_PORT_443_TCP_ADDR}:443" \
+    kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+```
+
+Создание секретов в разных «папках» для разных подов, разделим данные физически по путям:
 
 ```bash
 # Для сервера
-vault kv put secret/rent/server db_password="app_pass" api_key="abc"
+vault kv put secret/app/server-values db_password="app_pass" api_key="abc"
 
 # Для базы данных
-vault kv put secret/rent/db root_password="root_pass"
+vault kv put secret/db/db-values root_password="root_pass"
 ```
 
 Написание политики (Policies) — кто что видит:
 
-**Файл `server-policy.hcl`:**
+**Файл `server.hcl`:**
 
 ```hcl
 path "secret/data/app/server" {
@@ -111,7 +245,7 @@ path "secret/data/app/server" {
 }
 ```
 
-**Файл `db-policy.hcl`:**
+**Файл `db.hcl`:**
 
 ```hcl
 path "secret/data/rent/db" {
@@ -132,14 +266,14 @@ path "secret/data/rent/db" {
 vault write auth/kubernetes/role/server-role \
     bound_service_account_names=server-sa \
     bound_service_account_namespaces=default \
-    policies=server-policy \
+    policies=server \
     ttl=1h
 
 # Роль для базы
 vault write auth/kubernetes/role/db-role \
     bound_service_account_names=db-sa \
     bound_service_account_namespaces=default \
-    policies=db-policy \
+    policies=db \
     ttl=1h
 ```
 
@@ -152,22 +286,31 @@ vault write auth/kubernetes/role/db-role \
 
 ```yaml
 annotations:
-  ://hashicorp.com: "true"
-  ://hashicorp.com: "server-role" # Имя роли из шага 4
-  ://hashicorp.com-secret-env: "secret/data/rent/server"
-  # Шаблон, который превращает секрет в формат export VAR=VAL
-  ://hashicorp.com-template-env: |
-    {{- with secret "secret/data/rent/server" -}}
-    {{- range $k, $v := .Data.data }}
-    export {{ $k }}="{{ $v }}"
-    {{- end }}
-    {{- end -}}
+  vault.hashicorp.com/agent-inject: "true" # Маркер, чтобы была запущена инъекция
+  vault.hashicorp.com/role: "server-role" # Роль в vault
+  vault.hashicorp.com/agent-inject-secret-servervalues: "secret/app/server-values"
+  vault.hashicorp.com/agent-inject-template-servervalues: | # Конфиг для кастомной загрузки секретов прямо в под
+    {{ `{{- with secret "secret/data/app/server-values" -}}` }}
+    {{ `{{- range $key, $value := .Data.data }}` }}
+    export {{`{{$key}}`}}="{{`{{$value}}`}}"
+    {{ `{{- end }}` }}
+    {{ `{{- end -}}` }}
+spec:
+  serviceAccountName: {{ .Values.server.saname }}
 ```
 
 Запуск приложения
 
 Поскольку Vault Agent кладет эти `export` в файл `/vault/secrets/env`, твое приложение должно их «подхватить» при старте. В `command` контейнера нужно прописать:  
 `command: ["/bin/sh", "-c", "source /vault/secrets/env && node index.js"]`
+
+
+
+#### При ошибках, первым делом проверить логи init агента:
+
+```bash
+kubectl logs server-7fcb8d88f8-c97n5 -c vault-agent-init
+```
 
 
 ---
