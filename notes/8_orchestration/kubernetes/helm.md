@@ -63,6 +63,34 @@ spec:
 - `helm lint app` — проверка на ошибки в манифестах, используется в ci-cd
 - `helm package app` — запаковать чарт в архив
 
+При заблокированных helm registry, лучше всего спуллить чарт локально и использовать его
+
+```bash
+# Ingress Nginx (классический репозиторий)
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+helm pull ingress-nginx/ingress-nginx --version 4.10.1 --untar
+
+# Cert Manager (OCI репозиторий)
+# В OCI версии указываются без префикса 'v'
+helm pull oci://quay.io/jetstack/charts/cert-manager --version 1.14.4 --untar
+
+# External Secrets (классический репозиторий)
+helm repo add external-secrets https://charts.external-secrets.io
+helm repo update
+helm pull external-secrets/external-secrets --version 0.9.13 --untar
+
+# HashiCorp Vault (OCI из зеркала Яндекса)
+# Если не сработает версия с +yckms, используйте стандартную из официального oci://registry.terraform.io/hashicorp/vault
+helm pull oci://cr.yandex/yc-marketplace/yandex-cloud/vault/chart/vault --version 0.28.1+yckms --untar
+
+# NFS Ganesha (классический репозиторий)
+helm repo add nfs-ganesha https://kubernetes-sigs.github.io/nfs-ganesha-server-and-external-provisioner
+helm repo update
+helm pull nfs-ganesha/nfs-server-provisioner --version 1.8.0 --untar
+
+```
+
 ---
 
 ### Подробный синтаксис и примеры
@@ -175,7 +203,7 @@ helm pull oci://cr.yandex/yc-marketplace/yandex-cloud/vault/chart/vault \
 --untar
 ```
 
-#### Установка Nfs сервера ([[examples|установка в terraform]]):
+#### Установка NFS сервера ([[examples|установка в terraform]]):
 
 ```bash
 # В облаках важна правильная настройка сервера при установке

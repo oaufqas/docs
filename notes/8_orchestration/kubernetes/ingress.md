@@ -42,6 +42,12 @@ helm install ingress-nginx ingress-nginx/ingress-nginx \
 
 - **Проверка:** `kubectl get pods -n ingress-nginx`.
 
+Зеркало Yandex:
+
+```bash
+helm install ingress-nginx oci://cr.yandex/yc-marketplace/yandex-cloud/ingress-nginx/chart/ingress-nginx --namespace ingress-nginx --create-namespace
+```
+
 ---
 
 ##### 2. **Traefik:** Современный контроллер с автоматическим обновлением конфигурации и поддержкой Docker/K8s из коробки.
