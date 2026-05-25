@@ -24,5 +24,10 @@
 Запуск в docker container:
 
 ```bash
-docker run -d --name grafana (--network observability-net) -e GF_SECURITY_ADMIN_USER=admin -e GF_SECURITY_ADMIN_PASSWORD=admin -v grafana-storage:/var/lib/grafana -p 3000:3000 grafana/grafana-oss:latest
+docker run -d --name grafana (--network observability-net) \
+-e GF_SECURITY_ADMIN_USER=admin \
+-e GF_SECURITY_ADMIN_PASSWORD=admin \
+-v grafana-storage:/var/lib/grafana \
+-p 3000:3000 \
+grafana/grafana-oss:latest
 ```

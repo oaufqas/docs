@@ -20,7 +20,7 @@
 - **Counter (Счетчик):** Число, которое только растет (например, общее количество ошибок или запросов).
 - **Gauge (Индикатор):** Значение, которое может и расти, и уменьшаться (например, температура, текущее использование памяти).
 - **Histogram:** Группирует наблюдения по диапазонам (bucket) (например, длительность запросов).
-- **Summary:** Похожа на гистограмму, но вычисляет квантили на стороне приложения.
+- **Summary:** Похожа на гистограмму, но вычисляет квантили на стороне приложения. (используется очень редко)
 
 ---
 
@@ -32,3 +32,26 @@
     `docker run -d --name prometheus -p 9090:9090 -v /path/to/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus`
 - **Node Exporter** принимает все ресурсы хостовой ОС :  
     `docker run -d --name node-exporter --net="host" --pid="host" -v "/:/host:ro,rslave" prom/node-exporter --path.rootfs=/host`
+
+
+---
+
+### Пример конфига для prometheus
+
+```yaml
+global:
+  scrape_interval: 15s # Раз во сколько времени собирать информацию с exporter'ов
+
+rule_files: # файлы дополнительной конфигурации
+  - "alert.rules.yaml"
+
+scrape_configs:
+  - job_name: 'prometheus' # Джобы, группы серверов отслеживания
+    static_configs:
+      - targets: ['prometheus:9090'] # Перечисление адресов отслеживаемых серверов
+
+  - job_name: 'kali-node'
+    static_configs:
+      - targets: ['192.168.0.111:9100']
+
+```
