@@ -151,6 +151,7 @@ for host in server{1..10}; do ssh $host "uptime"; done # Выполнить ко
 uname -a                  # Информация о ядре
 uptime                    # Время работы, нагрузка
 dmesg | tail              # Последние сообщения ядра
+dmidecode                 # Информация об оборудовании
 
 # Процессы
 ps auxf                   # Дерево процессов
