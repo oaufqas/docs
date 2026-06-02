@@ -350,6 +350,12 @@ kubectl describe certificate <cert-name>
 kubectl delete -f ssl-test.yaml
 ```
 
+1. `kubectl get certificate` — проверяем статус. Должно быть `READY: True`.
+2. `kubectl get certificaterequest` — если статус `False`, смотрим здесь.
+3. `kubectl get challenge` — **самая частая точка отказа**. Если тут висит статус `Pending`, значит, робот Let's Encrypt не смог достучаться до твоего кластера по HTTP.
+    - _Причина А:_ Ты забыл направить домен на IP кластера в DNS.
+    - _Причина Б:_ Твоя **Security Group** (группа безопасности) в Yandex Cloud закрывает входящий порт **80**. Робот не может зайти на сайт, проверка проваливается, сертификат не выпускается.
+
 ---
 
 #### Сертификаты можно выпускать только 5 раз в неделю из-за строгих ограничеий Lets Encrypt
