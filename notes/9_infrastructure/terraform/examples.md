@@ -195,6 +195,12 @@ variable "folder_id" {}
 variable "zone" {}
 ```
 
+```terraform.tfvars
+token = ""
+cloud_id = ""
+folder_id = ""
+zone = ""
+```
 ### Создание виртуальной машины в yandex cloud
 
 ```hcl
