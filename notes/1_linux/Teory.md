@@ -1,13 +1,13 @@
-- ### [[basic-commands|Базовые и частоупотребляемые команды]]
-- ### [[file-system|Файловая система, сжатие файлов, ссылки]]
-- ### [[processes|Процессы, cgroups]]
-- ### [[environments_variables|Переменные окружения]]
-- ### [[notes/1_linux/networking|Основные сетевые утилиты, ssh]] !
-- ### [[user-permissions|Права доступа и пользователи]]
-- ### [[package-management|Package-management]]
-- ### [[bash-scripting|Баш-скриптинг]]
+- ### [[basic-commands|Основные команды]]
+- ### [[file-system|File-system, links, file compression, inode, file descriptors]]
+- ### [[processes|Processes, system calls, cgroups]]
+- ### [[environments_variables|Environment variables]]
+- ### [[notes/1_linux/networking|Networking]]
+- ### [[user-permissions|User permissions, users]]
+- ### [[package-management|Package management]]
+- ### [[bash-scripting|Bash scripting]]
 - ### [[systemd|Загрузка системы (systemd, journald)]]
-- ### Файервол [[iptables|iptables]], [[nftables|nftables]]
+- ### Firewall [[iptables|iptables]]
 
 #### Основные конфигурационные файлы:
 
@@ -25,7 +25,7 @@
 
 ---
 
-## 1. Философия Linux
+## Философия Linux
 
 ##### Основные принципы Unix-философии:
 
@@ -45,7 +45,7 @@
 
 ---
 
-## 2. Архитектура системы
+## Архитектура системы
 
 ┌───────────────────────────────────────────────────────┐
 │ Пользовательские приложения │ ← bash, nginx, docker
@@ -84,7 +84,7 @@ strace ls              # Посмотреть вызовы для ls
 
 ---
 
-## 3. Ядро Linux
+## Ядро Linux
 
 Что делает ядро?
 - Управление процессами (CPU scheduling)
@@ -103,7 +103,6 @@ strace ls              # Посмотреть вызовы для ls
 └── kernel version (версия ядра)
 ```
 
-
 ##### Модули ядра
 
 Динамически загружаемые части ядра:
@@ -117,7 +116,7 @@ modinfo module_name     # Информация о модуле
 
 ---
 
-## 4. Стандартные потоки ввода/вывода
+## Стандартные потоки ввода/вывода
 
 #### Три стандартных потока
 
@@ -167,7 +166,7 @@ EOF
 
 
 ---
-## 5. Планировщик задач
+## Планировщик задач
 
 #### Cron (периодические задачи)
 

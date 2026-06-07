@@ -63,7 +63,6 @@ grub2-mkconfig          # Обновить конфиг (RHEL/CentOS)
 |5|graphical.target|С GUI|
 |6|reboot.target|Перезагрузка|
 
-
 ```bash
 systemctl get-default               # Текущий target
 systemctl set-default multi-user.target  # Установить
@@ -116,7 +115,6 @@ systemctl isolate multi-user.target  # Переключить сейчас
 
 - `${name}.service.d/${01_some_override}.conf` или `systemctl edit ${name}` - возможность редактировать unit (override)
 
-
 ##### Для примера, давайте создадим службу, которая будет запускать наш скрипт /usr/bin/habr:
 
 ```bash
@@ -153,7 +151,7 @@ sudo systemctl enable habr
 
 #### Пример сервиса (SSHD, ssh daemon)
 
-```
+```sh
 [Unit]
 Description=OpenSSH server daemon
 Documentation=man:sshd(8) man:sshd_config(5)
