@@ -1,6 +1,6 @@
 - ### [[basic-commands|Основные команды]]
 - ### [[file-system|File-system, file compression]]
-- ### [[inodes|Inode, links]]
+- ### [[inodes-links|Inode, links]]
 - ### [[file-descriptors|File descriptors, i/o operators]]
 - ### [[virtual-file-system|VFS (Virtual File System)]]
 - ### [[processes-jobs|Processes, jobs]]
@@ -12,7 +12,8 @@
 - ### [[user-permissions|User permissions, users]]
 - ### [[package-management|Package management]]
 - ### [[bash-scripting|Bash scripting]]
-- ### [[init-process|Загрузка системы (systemd, journald)]]
+- ### [[init-process|Init processes]]
+- ### [[system-boot|System boot, initramfs]]
 - ### [[iptables|Firewall iptables]]
 
 #### Основные конфигурационные файлы:
