@@ -15,6 +15,7 @@
 - ### [[init-process|Init processes]]
 - ### [[system-boot|System boot, initramfs]]
 - ### [[iptables|Firewall iptables]]
+- ### [[hardware-virtualization|Hardware, virtualization]]
 
 #### Основные конфигурационные файлы:
 
