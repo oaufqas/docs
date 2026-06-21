@@ -16,6 +16,7 @@
 - ### [[system-boot|System boot, initramfs]]
 - ### [[iptables|Firewall iptables]]
 - ### [[hardware-virtualization|Hardware, virtualization]]
+- ### [[cgroups-namespaces|Cgroups, namespaces]]
 
 #### Основные конфигурационные файлы:
 
