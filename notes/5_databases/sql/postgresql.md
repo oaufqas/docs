@@ -51,7 +51,7 @@ sudo -u postgres psql
 
 # В консоли psql:
 CREATE DATABASE my_project_db;
-CREATE USER devops_admin WITH ENCRYPTED PASSWORD 'secure_pass';
+CREATE USER admin WITH ENCRYPTED PASSWORD 'pass';
 GRANT ALL PRIVILEGES ON DATABASE my_project_db TO devops_admin;
 
 -- В Postgres 15+ нужно дополнительно дать права на схему public:
@@ -72,7 +72,6 @@ GRANT ALL ON SCHEMA public TO devops_admin;
 
 ---
 
-
 #### Архитектура: Процессная модель
 
 В отличие от MySQL (потоки/threads), Postgres на каждое соединение создает отдельный **процесс (OS process)**.
@@ -87,12 +86,12 @@ GRANT ALL ON SCHEMA public TO devops_admin;
 - **`max_connections`**: Не ставьте больше 200–500 без пулера.
 - **`wal_level`**: Для репликации и бэкапов должен быть `replica` или `logical`.
 
-#### MVCC и Vacuum (Боль серминов)
+#### MVCC и Vacuum
 
 Postgres не удаляет данные физически сразу (`UPDATE` создает новую версию строки, старая помечается «мертвой»).
 
 - **Bloat**: Раздувание таблиц из-за накопления мертвых строк.
-- **Autovacuum**: Фоновый процесс очистки. **DevOps-задача**: мониторить, чтобы он успевал чистить быстрее, чем приложение пишет данные. Если база растет, а данных мало — тюньте `autovacuum_vacuum_scale_factor`.
+- **Autovacuum**: Фоновый процесс очистки. **Главная задача**: мониторить, чтобы он успевал чистить быстрее, чем приложение пишет данные. Если база растет, а данных мало — тюньте `autovacuum_vacuum_scale_factor`.
 
 #### [[../administration/replication#PostgreSQL (Streaming Replication)|Репликация]] и HA
 
