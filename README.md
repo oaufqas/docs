@@ -14,5 +14,6 @@ My personal DevOps knowledge base. It contains notes, cheat sheets, and useful r
 - [Virtualization (Proxmbox, Kvm, Vagrant)](./notes/10_virtualization)
 - [Monitoring (Prometheus, Grafana, Victoriametrics, Zabbix, Logging)](notes/11_monitoring/Teory.md)
 - [Clouds (Yandex, AWS)](./notes/12_clouds/Teory)
-- [Theory (DevOps, SRE)](./notes/13_theory)
-- [Scripts](./notes/14_scripts)
+- [Theory (DevOps, SRE)](./notes/13_theory/interview-questions)
+- [[./notes/14_cryptography/Theory|Cryptography]]
+- [Scripts](./notes/15_scripts)
