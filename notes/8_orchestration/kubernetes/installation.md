@@ -121,7 +121,7 @@ done < machines.txt
 ```bash
 scp ca.pem ca-key.pem \
 kubernetes.pem kubernetes-key.pem \
-service-account.pem service-account.pem \
+service-account.pem service-account-key.pem \
 k8s@control-plane:/tmp/
 ssh k8s@control-plane sudo mkdir -p /var/lib/kubernetes/pki/
 ssh k8s@control-plane sudo mv /tmp/*.pem /var/lib/kubernetes/pki/
@@ -346,4 +346,324 @@ scp encryption-config.yaml k8s@control-plane:~/
 
 **Etcd**
 
-Все компоненты куба - stateless (не хранят состояние). Поэтому все данные и состояния хранятся в базе данных etcd.
+Переносим на мастер ноду `etcd`, `etcdctl`, `etcd.service` (директория units). Закидываем бинари в `/usr/local/bin`.
+
+Все компоненты куба - stateless (не хранят состояние). Поэтому все данные и состояния хранятся в базе данных etcd. Настройка конфигурации etcd:
+
+```bash
+# Создаем директории для конфигурации
+mkdir -p /etc/etcd /var/lib/etcd
+# Читать конфигурацию сможет только root
+sudo chmod 700 /var/lib/etcd
+# Копируем сертификаты, чтобы база работала по https
+cp ca.pem kubernetes.pem kubernetes-key.pem /etc/etcd/
+# Перемещаем скопированный юнит файл, чтобы systemd его увидел
+mv etcd.service /etc/systemd/system
+# Просим systemd перечитать файлы с диска
+sudo systemctl daemon-reload
+# Включаем автозапуск etcd при старте машины
+sudo systemctl enable etcd
+# Запускаем базу данных в памяти прямо сейчас!
+sudo systemctl start etcd
+# Проверяем статус службы
+systemctl status etcd
+# Проверка самой базы
+sudo etcdctl member list --endpoints=https://127.0.0.1:2379 --cacert=/etc/etcd/ca.pem --cert=/etc/etcd/kubernetes.pem --key=/etc/etcd/kubernetes-key.pem
+```
+
+
+**Control plane**
+
+После успешного запуска базы etcd, можно перекинуть оставшиеся бинари, их unit-файлы и kubeconfig на мастер.
+
+```bash
+scp downloads/controller/kube-apiserver 
+downloads/controller/kube-controller-manager 
+downloads/controller/kube-scheduler 
+downloads/client/kubectl 
+units/kube-apiserver.service 
+units/kube-controller-manager.service 
+units/kube-scheduler.service 
+configs/kube-scheduler.yaml 
+configs/kube-apiserver-to-kubelet.yaml 
+k8s@control-plane:~/
+```
+
+Все ключевые файлы control-plane складываются в `/var/lib/kubernetes`, в ней лежит все чувствительное: серты, ca, ключи, конфиги. Если утерять доступ к этой директории, то кластер скорее всего не восстановить без пересоздания компонентов.
+
+#### Конфиги в `/etc/kubernetes/config/`
+
+`/etc/kubernetes/config/kube-scheduler.yaml`:
+
+```yaml
+apiVersion: kubescheduler.config.k8s.io/v1
+kind: KubeSchedulerConfiguration
+clientConnection:
+  kubeconfig: "/var/lib/kubernetes/kube-scheduler.kubeconfig"
+leaderElection:
+  leaderElect: true
+```
+
+`/etc/kubernetes/config/kube-apiserver-to-kubelet.yaml`:
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: "true"
+  labels:
+    kubernetes.io/bootstrapping: rbac-defaults
+  name: system:kube-apiserver-to-kubelet
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/proxy
+      - nodes/stats
+      - nodes/log
+      - nodes/spec
+      - nodes/metrics
+    verbs:
+      - "*"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: system:kube-apiserver
+  namespace: ""
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:kube-apiserver-to-kubelet
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: kubernetes
+```
+
+#### Юниты в `/etc/systemd/system/`
+
+`/etc/systemd/system/etcd.service`:
+
+```ini
+[Unit]
+Description=etcd
+Documentation=https://github.com/etcd-io/etcd
+
+[Service]
+Type=notify
+ExecStart=/usr/local/bin/etcd \
+  --name=controller \
+  --cert-file=/etc/etcd/kubernetes.pem \
+  --key-file=/etc/etcd/kubernetes-key.pem \
+  --peer-cert-file=/etc/etcd/kubernetes.pem \
+  --peer-key-file=/etc/etcd/kubernetes-key.pem \
+  --trusted-ca-file=/etc/etcd/ca.pem \
+  --peer-trusted-ca-file=/etc/etcd/ca.pem \
+  --peer-client-cert-auth \
+  --client-cert-auth \
+  --initial-advertise-peer-urls=https://127.0.0.1:2380 \
+  --listen-peer-urls=https://127.0.0.1:2380 \
+  --listen-client-urls=https://127.0.0.1:2379 \
+  --advertise-client-urls=https://127.0.0.1:2379 \
+  --initial-cluster-token=etcd-cluster-0 \
+  --initial-cluster=controller=https://127.0.0.1:2380 \
+  --initial-cluster-state=new \
+  --data-dir=/var/lib/etcd
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+1. `--listen-client-urls` (Что слушаем от программ)
+- **За что отвечает:** Указывает IP-адреса и порты, на которых процесс `etcd` открывает сетевые сокеты для приема входящих запросов от клиентов (в нашем случае — от `kube-apiserver` и утилиты `etcdctl`).
+
+2. `--advertise-client-urls` (Что советуем клиентам)
+- **За что отвечает:** «Рекламный» адрес для клиентов. В распределенном кластере (когда мастеров 3 штуки), если клиент стучится на Мастер-1, этот `etcd` возвращает ему список адресов, говоря: если я умру, ищи мои копии по этим официальным адресам.
+
+3. `--listen-peer-urls` (Что слушаем от других etcd)
+- **За что отвечает:** Открывает сетевой сокет на порту **2380**. Этот порт используется **исключительно для связи между самими узлами `etcd`** (Peer-to-Peer) для синхронизации базы по алгоритму консенсуса Raft. Сюда клиенты (API-сервер) ломиться не имеют права.
+
+4. `--initial-advertise-peer-urls` (Что заявляем другим etcd)
+- **За что отвечает:** Адрес, который данный узел `etcd` отправляет своим соседям по кластеру.
+
+5. `--initial-cluster`
+- **За что отвечает:** Жесткая карта всей распределенной сети при первом старте базы.
+- В нашем случае написано `control-plane=https://192.168.100.10:2380`. Если бы мастеров было три, строка бы выглядела так: `master1=https://...:2380,master2=https://...:2380...`.
+
+6. `--initial-cluster-token`
+- **За что отвечает:** Секретное кодовое слово (у нас `etcd-k8s-token`). Защищает от случайного зацикливания сетей. Если в вашей домашней Wi-Fi сети кто-то рядом тоже запустит свой `etcd`, их базы не попытаются автоматически объединиться в один кластер, так как токены (пароли кластеров) не совпадут.
+
+`/etc/systemd/system/kube-apiserver.service`:
+
+```ini
+[Unit]
+Description=Kubernetes API Server
+Documentation=https://github.com/kubernetes/kubernetes
+
+[Service]
+ExecStart=/usr/local/bin/kube-apiserver \
+  --advertise-address=192.168.100.10 \
+  --apiserver-count=1 \
+  --allow-privileged=true \
+  --audit-log-maxage=30 \
+  --audit-log-maxbackup=3 \
+  --audit-log-maxsize=100 \
+  --audit-log-path=/var/log/audit.log \
+  --authorization-mode=Node,RBAC \
+  --bind-address=0.0.0.0 \
+  --client-ca-file=/var/lib/kubernetes/ca.pem \
+  --enable-admission-plugins=NamespaceLifecycle,NodeRestriction,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \
+  --etcd-cafile=/var/lib/kubernetes/ca.pem \
+  --etcd-certfile=/var/lib/kubernetes/kubernetes.pem \
+  --etcd-keyfile=/var/lib/kubernetes/kubernetes-key.pem \
+  --etcd-servers=https://127.0.0.1:2379 \
+  --event-ttl=1h \
+  --encryption-provider-config=/var/lib/kubernetes/encryption-config.yaml \
+  --kubelet-certificate-authority=/var/lib/kubernetes/ca.pem \
+  --kubelet-client-certificate=/var/lib/kubernetes/kubernetes.pem \
+  --kubelet-client-key=/var/lib/kubernetes/kubernetes-key.pem \
+  --runtime-config='api/all=true' \
+  --service-account-key-file=/var/lib/kubernetes/service-account.pem \
+  --service-account-signing-key-file=/var/lib/kubernetes/service-account-key.pem \
+  --service-account-issuer=https://control-plane.kubernetes.local:6443 \
+  --service-node-port-range=30000-32767 \
+  --service-cluster-ip-range=10.32.0.0/24 \
+  --tls-cert-file=/var/lib/kubernetes/kubernetes.pem \
+  --tls-private-key-file=/var/lib/kubernetes/kubernetes-key.pem \
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+1. `--authorization-mode=Node,RBAC` (Фильтр безопасности)
+- **За что отвечает:** Включает двухэтапную проверку прав.
+    - `Node` — специальный режим, который разрешает воркерам (`kubelet`) изменять только свои собственные параметры (чтобы взломанный Воркер-1 не мог удалить Воркер-2).
+    - `RBAC` (Role-Based Access Control) — включает проверку прав на основе ролей. Именно он считывает поле `O: system:masters` в вашем сертификате админа и дает вам права корня.
+
+2. `--bind-address=0.0.0.0`
+- **За что отвечает:** Приказывает ядру открыть порт **6443** (главный порт Kubernetes) абсолютно на всех доступных сетевых интерфейсах мастера (и на `127.0.0.1`, и на Wi-Fi адресе `192.168.100.10`). Благодаря этому вы можете управлять кластером со своего ноутбука по воздуху.
+
+3. `--enable-admission-plugins=...,NodeRestriction,...` (Плагины допуска)
+- **За что отвечает:**Admission-плагины — это судейская коллегия ядра Кубера. Когда вы просите создать под, запрос сначала проходит проверку RBAC (можно ли вам вообще создавать поды), а затем падает наAdmission-плагины. Они проверяют бизнес-логику: например, `LimitRanger` проверяет, не запросил ли под больше памяти, чем разрешено в этом namespace, а `NodeRestriction` жестко ограничивает права воркеров.
+
+4. `--service-cluster-ip-range=10.32.0.0/24`
+- **За что отвечает:** Это виртуальная подсеть, из которой Kubernetes будет выделять IP-адреса для внутренних абстракций — **Сервисов (Services)**. Эти адреса физически не существуют на сетевых картах, ядро Linux будет перехватывать их через `iptables` и перенаправлять на реальные поды. Первым адресом в этой сети автоматически станет `10.32.0.1` — внутренний IP самого API-сервера, который мы зашивали в его сертификат.
+
+5. `--service-account-signing-key-file` и `--service-account-issuer`
+- **За что отвечает:** Включают механизм генерации токенов безопасности для контейнеров (подов). API-сервер использует приватный ключ `service-account-key.pem` для криптографической подписи JWT-токенов, которые поды используют для подтверждения своей личности
+
+`/etc/systemd/system/kube-controller-manager.service`:
+
+```ini
+[Unit]
+Description=Kubernetes Controller Manager
+Documentation=https://github.com/kubernetes/kubernetes
+
+[Service]
+ExecStart=/usr/local/bin/kube-controller-manager \
+  --bind-address=0.0.0.0 \
+  --cluster-cidr=10.200.0.0/16 \
+  --cluster-name=kubernetes-the-hard-way \
+  --cluster-signing-cert-file=/var/lib/kubernetes/ca.pem \
+  --cluster-signing-key-file=/var/lib/kubernetes/ca-key.pem \
+  --kubeconfig=/var/lib/kubernetes/kube-controller-manager.kubeconfig \
+  --root-ca-file=/var/lib/kubernetes/ca.pem \
+  --service-account-private-key-file=/var/lib/kubernetes/service-account-key.pem \
+  --service-cluster-ip-range=10.32.0.0/24 \
+  --use-service-account-credentials=true \
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+1. `--cluster-cidr=10.200.0.0/16`
+- **За что отвечает:** **Самый главный сетевой флаг для подов.** Это гигантская виртуальная сеть, в которой будут жить ваши контейнеры. Контроллер-менеджер берет эту сеть `/16` (65 536 адресов) и автоматически нарезает её на маленькие кусочки `/24` (по 256 адресов) персонально для каждого воркера.
+- _Вспоминаем наш файл `machines.txt`:_ Воркер-0 получил подсеть `10.200.0.0/24`, а Воркер-1 — `10.200.1.0/24`. Контроллер-менеджер следит, чтобы поды на разных нодах никогда не получили одинаковые IP-адреса.
+
+2. `--leader-elect=true` (Выборы лидера)
+- **За что отвечает:** Защита от конфликтов. Если вы запустите 3 мастера, на всех трех запустятся процессы `kube-controller-manager`. Чтобы они не начали одновременно отдавать противоположные приказы воркерам, этот флаг включает выборы. Бинарники делают микро-запись в `etcd` (берут блокировку). Тот, кто успел первым, становится Лидером (активным), а остальные два уходят в режим сна, готовые проснуться, если Лидер зависнет.
+
+3. `--use-service-account-credentials=true`
+- **За что отвечает:** Приказывает контроллерам внутри бинарника не использовать общие права root, а для каждой своей подзадачи (контроллер нод, контроллер подов) генерировать свой собственный изолированный Service Account с минимально необходимыми правами.
+
+`/etc/systemd/system/kube-scheduler.service`
+
+```ini
+[Unit]
+Description=Kubernetes Scheduler
+Documentation=https://github.com/kubernetes/kubernetes
+
+[Service]
+ExecStart=/usr/local/bin/kube-scheduler \
+  --config=/etc/kubernetes/config/kube-scheduler.yaml \
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+
+После раскладывания бинарников и конфигов по нужным директориям, `kube-apiserver` должен заработать, проверить можно с помощью:
+
+```bash
+sudo etcdctl member list --endpoints=https://127.0.0.1:2379 --cacert=/etc/etcd/ca.pem --cert=/etc/etcd/kubernetes.pem --key=/etc/etcd/kubernetes-key.pem
+#91d7626d11b5d211, started, controller, https://127.0.0.1:2380, https://127.0.0.1:2379, false
+
+kubectl cluster-info
+#Kubernetes control plane is running at https://control-plane.kubernetes.local:6443
+
+k8s@control-plane:~$ kubectl get componentstatuses
+#NAME                 STATUS    MESSAGE   ERROR
+#scheduler            Healthy   ok
+#controller-manager   Healthy   ok
+#etcd-0               Healthy   ok
+
+curl --cacert ca.pem https://control-plane.kubernetes.local:6443
+#{
+#  "kind": "Status",
+#  "apiVersion": "v1",
+#  "metadata": {},
+#  "status": "Failure",
+#  "message": "forbidden: User \"system:anonymous\" cannot get path \"/\"",
+#  "reason": "Forbidden",
+#  "details": {},
+#  "code": 403
+#}
+```
+
+Если везде получили такой вывод, control-plane запустился успешно!
+
+Если api-server не запускается, нужно глянуть логи:
+
+```bash
+sudo journalctl -u kube-apiserver.service -n 50 
+```
+
+Проблемы, которые были у меня:
+1) Так как изначально unit-файлы использовал шаблонные, в них отличались пути к файлам конфигураций и сертификатов, поэтому юниты всегда нужно внимательно проверять и подгонять под себя.
+2) Отличалось доменное имя кластера, а сертификат для kube-apiserver был сгенерен для других доменов. При генерации сертификата, указываются все имена, по которым будут обращаться к серверу, так как он у меня называется control-plane, нужно было добавить несколько доменов (control-plane.kubernetes.local) в команду и перегенерировать сертификат и потом раскидать его по нужным директориям.
+3) При переводе базы etcd с простого http на https (mtls) необходимо добавить соответствующие флаги-указания расположения сертификатов в юнит kube-apiserver.
+4) После запуска etcd, нужно проверить, оба ли порта запустились на https, потому что она может промолчать об этом, и при ошибке во флагах, запустить эндпоинт без шифрования. И важно помнить, что etcd это база данных, она сохраняет нерабочие конфиги в себе, поэтому нужно их очищать  `sudo rm -rf /var/lib/etcd`!
+
+После успешной установки control-plane, нужно заапплаить конфиг по пути `etc/kubernetes/config/kube-apiserver-to-kubelet.yaml` для правил RBAC:
+
+```bash
+kubectl apply -f kube-apiserver-to-kubelet.yaml
+```
+
+
+### Worker nodes
+
+![[Pasted image 20260722235120.png]]
