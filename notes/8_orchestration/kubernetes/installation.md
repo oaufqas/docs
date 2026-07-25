@@ -689,11 +689,11 @@ cgroupDriver: systemd
 containerRuntimeEndpoint: "unix:///var/run/containerd/containerd.sock"
 enableServer: true
 failSwapOn: false
-maxPods: 16
+maxPods: 32
 memorySwap:
   swapBehavior: NoSwap
 port: 10250
-resolvConf: "/etc/resolv.conf"
+resolvConf: "/run/systemd/resolve/resolv.conf"
 registerNode: true
 runtimeRequestTimeout: "15m"
 clusterDNS:
@@ -997,3 +997,25 @@ kubectl exec -it <po_name> -- bash
 
 curl test-nginx # Должно отработать 
 ```
+
+
+---
+
+#### Переезд на CNI-plugin calico
+
+Ручной вариант настройки сети хорош для понимания работы сети в kubernetes. Но он сложно масштабируем, если добавилась новая worker-node, нужно изменять настройки на всех уже имеющихся. Поэтому для начала нужно полностью очистить папку `/etc/cni/net.d/` на воркерах. CNI-plugin самостоятельно создаст в ней нужные файлы. Удалить ручные маршруты (`ip route add...`), можно просто перезагрузить сервер, данные хранятся в оперативной памяти. **Удалить виртуальный мост `cni0`:**  
+Старый мост, который создавала утилита `bridge`, больше не нужен. 
+
+```bash
+sudo ip link set cni0 down
+sudo ip link delete cni0
+```
+
+Настройка конфигов и становка CNI:
+
+- **Вернуть и жестко зафиксировать `podCIDR` в `/var/lib/kubelet/kubelet-config.yaml`:**  
+	Теперь этот флаг становится **обязательным**. Kubelet должен четко рапортовать Мастеру, каким диапазоном сети он владеет, чтобы CNI-плагин мог прочитать это из API-сервера и построить правильный тоннель.
+	- _На Воркере 1:_ `podCIDR: "10.200.0.0/24"`
+	- _На Воркере 2:_ `podCIDR: "10.200.1.0/24"`
+- **Проверить пути к CNI в `containerd`:**  
+	Убедитесь, что в `/etc/containerd/config.toml` рантайм по-прежнему смотрит в стандартные папки: `bin_dir = "/opt/cni/bin"` и `conf_dir = "/etc/cni/net.d"`. CNI-плагины будут подкладывать свои бинарники именно туда.

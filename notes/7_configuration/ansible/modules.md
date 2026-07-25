@@ -86,7 +86,7 @@ ansible all -m copy -a 'src=/etc/hosts dest=/tmp/hosts backup=yes'
 
 - name: Удалить файл/директорию
   file:
-    path: /tmp/oldfile.txt
+    path: /tmp/oldfile.txt # * не будет включать в себя все файлы!
     state: absent
 
 - name: Рекурсивно изменить права

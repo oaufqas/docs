@@ -1,6 +1,6 @@
-## Playbooks - YAML-файлы, описывающие сценарии: какие задачи (tasks) выполнять на хостах из Inventory.
+**Playbooks** - YAML-файлы, описывающие сценарии: какие задачи (tasks) выполнять на хостах из Inventory.
 
-##### Например playbook.yml:
+Например playbook.yml:
 
 ```yml
 --- # Начало YAML файла плейбука
@@ -69,7 +69,7 @@
 ```
 
 
-### Основные директивы (Ключевые элементы):
+#### Основные директивы (Ключевые элементы):
 
 - **hosts** - Кого настраиваем
 
@@ -80,7 +80,6 @@
 - hosts: 192.168.1.10           # Конкретный IP
 - hosts: webservers:databases   # Несколько групп
 ```
-
 
 - **name** - Описание задачи
 
@@ -96,7 +95,6 @@ tasks:
       src: app.conf
       dest: /etc/app/
 ```
-
 
 - **vars** - Переменные
 
@@ -120,7 +118,6 @@ tasks:
         state: present
 ```
 
-
 - **vars_files** - Переменные из файлов
 
 ```yml
@@ -133,7 +130,6 @@ tasks:
       debug:
         msg: "DB host: {{ database_host }}"
 ```
-
 
 - **become** - Повышение привилегий
 
@@ -157,9 +153,7 @@ tasks:
         msg: "Я {{ result.stdout }}"  # Выведет "postgres"
 ```
 
-
-## Управление выполнением 
-
+#### Управление выполнением 
 
 - **when** - Условное выполнение
 
@@ -256,8 +250,7 @@ tasks:
       - script_result.rc == 0
 ```
 
-## Итерации и циклы
-
+#### Итерации и циклы
 
 - **loop** - Перебор списка (**with_items** - старый синтаксис)
 
@@ -283,7 +276,6 @@ tasks:
       - { name: 'charlie', groups: 'docker' }
 ```
 
-
 - **with_dict** - Перебор словаря
 
 ```yml
@@ -302,9 +294,7 @@ tasks:
         groups: sudo
 ```
 
-
-## Хранение данных
-
+#### Хранение данных
 
 - **vars_prompt** - Запрос ввода
 
@@ -321,7 +311,6 @@ tasks:
       debug:
         msg: "Пароль: {{ database_password }}"
 ```
-
 
 - **set_fact** - Создание переменных
 
@@ -342,9 +331,7 @@ tasks:
       state: directory
 ```
 
-
-## Обработчики (handlers)
-
+#### Обработчики (handlers)
 
 - **handlers** - Задачи по уведомлению
 
@@ -374,9 +361,7 @@ handlers:
       state: restarted
 ```
 
-
-## Подключение файлов
-
+#### Подключение файлов
 
 - **include_tasks** / **import_tasks** - Подключение файла задач
 
@@ -389,7 +374,6 @@ tasks:
     import_tasks: configure-app.yml
     when: env == "production"
 ```
-
 
 - include_vars - Подключение переменных
 
@@ -406,9 +390,7 @@ tasks:
         - yaml
 ```
 
-
-## Roles
-
+#### Roles
 
 - **roles** - Использование ролей
 
@@ -424,7 +406,6 @@ tasks:
       when: install_db | default(False)
 ```
 
-
 - **apply** - Применить роли с условиями
 
 ```yml
@@ -436,9 +417,7 @@ tasks:
       when: ansible_os_family == "Debian"
 ```
 
-
-## Теги (tags)
-
+#### Теги (tags)
 
 - **tags** - Маркировка задач
 
@@ -468,9 +447,7 @@ tasks:
       - nginx
 ```
 
-
-## Блоки и стратегии выаолнения 
-
+#### Блоки и стратегии выаолнения 
 
 - **block** - Группировка задач
 
@@ -495,7 +472,6 @@ tasks:
     become: yes
     ignore_errors: yes
 ```
-
 
 - **rescue** и **always** (как try/catch)
 
