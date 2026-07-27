@@ -2,21 +2,21 @@
 
 | Команда | Описание | Пример                  
 |---|---|---
-| `chmod`   | Изменить права       | chmod 755 script.sh 
-| `chown`   | Изменить владельца   | chown user:group file
-| `umask`   | Маска по умолчанию   | umask 022           
-| `ls -l`   | Посмотреть права     | ls -l                 
-| `whoami`  | Текущий пользователь | whoami
-| `id`	    | ID пользователя	   | id
-| `useradd` | Создать пользователя | useradd -m -s /bin/bash user
-| `usermod` | Изменить пользователя| usermod -aG docker user (Добавляет в группу)
-| `userdel` | Удалить пользователя | userdel -r user (с домашней папкой)
-| `passwd`  | Сменить пароль	   | passwd user
-| `groupadd`| Создать группу	   | groupadd docker
-| `groups`  | Группы пользователя  | groups user
-| `sudo`	| Выполнить от root	   | super user do command
-| `gpasswd` | Удалить из группы    | sudo gpasswd -d <имя_пользователя> <имя_группы>
-| `sudo -i` | Правильное переключение под рута| sudo -i
+| `chmod`   | Изменить права       | `chmod 755 script.sh` 
+| `chown`   | Изменить владельца   | `chown user:group file`
+| `umask`   | Маска по умолчанию   | `umask 022`           
+| `ls -l`   | Посмотреть права     | `ls -l`                 
+| `whoami`  | Текущий пользователь | `whoami`
+| `id`	    | ID пользователя	   | `id`
+| `useradd` | Создать пользователя | `useradd -m -s /bin/bash user`
+| `usermod` | Изменить пользователя| `usermod -aG docker user` (Добавляет в группу)
+| `userdel` | Удалить пользователя | `userdel -r user` (с домашней папкой)
+| `passwd`  | Сменить пароль	   | `passwd user`
+| `groupadd`| Создать группу	   | `groupadd docker`
+| `groups`  | Группы пользователя  | `groups user`
+| `sudo`	| Выполнить от root	   | `super user do command`
+| `gpasswd` | Удалить из группы    | `sudo gpasswd -d <имя_пользователя> <имя_группы>`
+| `sudo -i` | Правильное переключение под рута| `sudo -i`
 
 
 ![[Pasted image 20260611000954.png]]

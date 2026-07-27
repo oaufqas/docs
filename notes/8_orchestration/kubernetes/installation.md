@@ -880,7 +880,7 @@ for HOST in node-0 node-1; do
 	ssh k8s@${HOST} sudo mkdir -p /etc/cni/net.d /opt/cni/bin /var/lib/kubelet /var/lib/kube-proxy /var/lib/kubernetes/ /var/run/kubernetes
 	ssh k8s@${HOST} sudo mv crictl kube-proxy kubelet runc /usr/local/bin/
 	ssh k8s@${HOST} sudo mv containerd containerd-shim-runc-v2 containerd-stress /usr/local/bin/
-	ssh k8s@${HOST} sudo mv cni-plugins/* /opt/cni/bin/
+	ssh k8s@${HOST} sudo mv cni-plugins/* 2
 	ssh k8s@${HOST} sudo mv 10-bridge.conf 99-loopback.conf /etc/cni/net.d/
 done
 ```
@@ -1019,3 +1019,31 @@ sudo ip link delete cni0
 	- _На Воркере 2:_ `podCIDR: "10.200.1.0/24"`
 - **Проверить пути к CNI в `containerd`:**  
 	Убедитесь, что в `/etc/containerd/config.toml` рантайм по-прежнему смотрит в стандартные папки: `bin_dir = "/opt/cni/bin"` и `conf_dir = "/etc/cni/net.d"`. CNI-плагины будут подкладывать свои бинарники именно туда.
+
+Установка манифеста:
+
+```bash
+curl -O https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/calico.yaml
+```
+
+Изменение CIDR для подов:  
+
+Найдите в файле `calico.yaml` переменную `CALICO_IPV4POOL_CIDR`. Она должна совпадать с CIDR, который мы использовали для сети подов при настройке кластера (это `10.200.0.0/16`). Если CIDR отличается, замените его:
+
+```bash
+sed -i 's|192.168.0.0/16|10.200.0.0/16|g' calico.yaml
+```
+
+Применияем манифест в кластер:
+
+```bash
+kubectl apply -f calico.yaml
+```
+
+Поды Calico должны запуститься в пространстве имен `kube-system`. Для проверки статуса используйте команду:
+
+```bash
+kubectl get pods -n kube-system -l k8s-app=calico-node
+```
+
+Все поды `calico-node` должны быть в состоянии `Running`.

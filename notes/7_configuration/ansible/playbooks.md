@@ -68,6 +68,131 @@
         state: restarted
 ```
 
+Пример как можно прочитать строки из файла и сделать из них массив:
+
+```yaml
+- name: Reading a list of links..
+  slurp: 
+    src: "{{ role_path }}/files/downloads-{{ architecture }}.txt"
+  register: links_binaries_files
+  delegate_to: localhost
+  run_once: true
+  
+
+- name: Parsing links into an Ansible array..
+  set_fact:
+    download_links: "{{ (links_binaries_files.content | b64decode).splitlines() | reject('match', '^\\s*$') | list }}"
+  delegate_to: localhost
+  run_once: true
+
+  
+- name: Local installation all binaries files..
+  get_url:
+    url: "{{ item }}"
+    dest: "{{ bindir }}/{{ item | basename }}"
+    mode: 644
+  loop: "{{ download_links }}"
+  delegate_to: localhost
+  run_once: true
+```
+
+- `slurp` считывает файл с диска и кодирует содержимое файла в шифрованную строку **Base64** и сохраняет в переменную `links_binaries_files`.
+- `download_link` - переменная, в которую с помощью модуля `set_fact` сохраняется форматированная строка: `| b64decode` раскодируется из b64, **`.splitlines()`** встроенный метод Python берет наш большой кусок текста и разрезает его везде, где видит перенос строки (`\n`), **`| reject('match', '^\\s*$')`** мощный фильтр очистки данных, отбрасывает лишние пробелы и пустые строки, **`| list`** финальный фильтр, который превращает внутренний очищенный генератор Python обратно в  YAML-список (массив). В `download_links` находится:
+
+```json
+[
+  "https://k8s.io",
+  "https://k8s.io",
+  "https://k8s.io",
+  ...
+  "https://github.com"
+]
+```
+
+Скачивание в цикле через `get_url` (аналог `wget` либо `curl`)
+
+Ключевое слово **`loop: "{{ download_links }}"`** запускает бесконечный цикл по массиву ссылок . При каждой итерации текущая ссылка подставляется в системную переменную **`{{ item }}`**.
+
+- В аргументе **`dest`** используется фильтр **`| basename`**. Это классическая утилита Unix, которая отрезает от длинного пути всё, оставляя только **самое последнее слово после слэша**.
+
+В итоге в аргументе `dest` на первой итерации соберется красивый и точный путь сохранения:  
+`/root/k8s-ansible/../k8s-binaries-cache/kubectl`
+
+
+Еще хороший пример:
+
+```yaml
+---
+- name: Local build of cluster binaries
+  delegate_to: localhost # Исполнять на локальной машине
+  run_once: true # Выполнить 1 раз, вне зависимости от кол-ва хостов
+  block: # Группировка тасок
+  - name: Checking a local directory for binaries..
+    file:
+      path: "{{ bindir }}/cni-plugins" # Проверка наличия директории
+      state: directory
+      mode: '0700'
+
+
+  - name: Reading a list of links.. # Разбор этих блоков есть выше
+    slurp: 
+      src: "{{ role_path }}/files/downloads-{{ architecture }}.txt"
+    register: links_binaries_files
+
+  
+  - name: Parsing links into an Ansible array..
+    set_fact:
+      download_links: "{{ (links_binaries_files.content | b64decode).splitlines() | reject('match', '^\\s*$') | list }}"
+
+  
+  - name: Parsing .tar.gz archive names into an Ansible array..
+    set_fact:
+      tar_gz_archives: "{{ download_links | map('basename') | select('search', '\\.tar\\.gz$|\\.tgz$') | list }}"
+
+
+  # - name: console log download links # Вывод в консоль переменных
+  #   debug:
+  #     var: download_links
+
+  
+  # - name: console log tar gz archives
+  #   debug:
+  #     var: tar_gz_archives
+
+
+  - name: Local installation all binaries files..
+    get_url:
+      url: "{{ item }}"
+      dest: "{{ bindir }}/{{ item | basename }}"
+      mode: '0755'
+    loop: "{{ download_links }}"
+
+  
+  - name: Extracting archives..
+    shell: # Команда, в которую подставляется Ansible-словарь
+      cmd: "tar -xvf {{ item }} {{ archive_rules[item] | default('') }}"
+      chdir: "{{ bindir }}" # Обязательно указывать директорию с изменениями!!!
+    loop: "{{ tar_gz_archives }}" # Цикл по переменной с массивом архивов
+
+
+  - name: Checking runc.amd64 is exists
+    stat: # Проверка наличия файла и запись результата в переменную runc_file
+      path: "{{ bindir }}/runc.{{ architecture }}"
+    register: runc_file
+
+
+  - name: Rename runc.amd64 to runc
+    command:
+      cmd: "mv {{ bindir }}/runc.{{ architecture }} {{ bindir }}/runc"
+    when: runc_file.stat.exists # Проверка переменной
+
+
+  - name: Cleaning up .tar.gz arhives
+    file: # Цикличная очистка архивов с переменной
+      path: "{{ bindir }}/{{ item }}"
+      state: absent
+    loop: "{{ tar_gz_archives }}"
+```
 
 #### Основные директивы (Ключевые элементы):
 

@@ -41,6 +41,7 @@ sudo locale-gen en_US.UTF-8
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 ```
+
 #### Работа в консоли
 
 Консольные команды Ansible строятся по логичному шаблону. Их можно разделить на **Ad-hoc команды** (однострочники) и запуск **Playbooks**.
