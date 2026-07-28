@@ -981,6 +981,51 @@ kubectl apply -f https://raw.githubusercontent.com/mmumshad/kubernetes-the-hard-
 Проблемы с которыми столкнулся:
 
 1) Бесконечный цикл запросов на DNS сервер "выше". Если coreDNS не знает домен, он отправляет запрос другому серверу. В ubuntu в файле `/etc/resolv.conf` заглушка с адресом 127.0.0.53 (адрес самого coreDNS). Нужно в конфиге `kubelet` заменить `resolvConf` на `resolvConf: "/run/systemd/resolve/resolv.conf"`.
+2) Сервисы не резолвятся в подах:
+
+```bash
+$ nslookup test-nginx.svc.cluster.local 
+Server: 10.32.0.10 
+# Address 1: 10.32.0.10 kube-dns.kube-system.svc.cluster.local 
+
+# nslookup: can't resolve 'test-nginx.svc.cluster.local' command terminated with exit code 1
+```
+
+Решением стало поменять домен кластера в kubelet-config. Настроить `/etc/hosts` на всех нодах и добавить домены к мастеру в сертификате, перевыпустить сертификат. Команды, которые помогают отдебажить:
+
+```bash
+kubectl edit configmap coredns -n kube-system # Проверка конфига
+kubectl rollout restart deployment coredns -n kube-system # После каждого изменения рестартать
+kubectl logs -n kube-system -l k8s-app=kube-dns --tail=50 # Проверка логов
+kubectl get endpoints kube-dns -n kube-system
+kubectl get endpoints <svc>
+
+kubectl run busybox --image=busybox:1.28 --restart=Never -- sleep 3600 # Проверки утилитами изнутри подов
+kubectl exec -ti busybox -- nslookup kube-dns.kube-system.svc.cluster.local
+kubectl exec -it busybox -- wget https://10.32.0.1 --no-check-certificate
+kubectl exec -it busybox -- cat /etc/resolv.conf # Проверка конфигурации coreDNS
+
+
+kubectl exec -it busybox -- nslookup kubernetes.default.svc.cluster.local 10.200.1.5
+
+# Если этот запрос СРАБОТАЛ (вернул 10.32.0.1): Значит, CoreDNS абсолютно здоров. Проблема на 100% кроется в kube-proxy, который не может перенаправить трафик с виртуального IP 10.32.0.10 на реальный под.
+# Если НЕ сработал: CoreDNS полностью изолирован на уровне сети воркеров
+```
+
+В конфигурационном файле `/var/lib/kubelet/kubelet-config.yaml` в поле `clusterDomain` по мировому стандарту должно быть жестко прописано строго **`cluster.local`** (в кавычках).
+
+```yaml
+clusterDomain: "cluster.local"
+clusterDNS:
+  - "10.32.0.10"
+```
+
+За что отвечает этот параметр:
+
+Когда под пытается отрезолвить короткое имя (например, вы пишете `nslookup test-nginx`), Kubelet, используя значение `clusterDomain`, автоматически собирает для пода суффиксы поиска (строку `search` в файле `/etc/resolv.conf` внутри контейнера).  
+Он дописывает туда: `default.svc.cluster.local`, `svc.cluster.local`, `cluster.local`.
+
+---
 
 После этого поды смогут общаться между собой по доменным именам. 
 

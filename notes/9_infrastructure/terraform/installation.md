@@ -1,7 +1,6 @@
-### [Windows install zip](https://developer.hashicorp.com/terraform/install)
+В россии проекты от hashicorp, включая terraform недоступны, поэтому лучший вариант с впн установить .zip с [официального сайта]([Install | Terraform | HashiCorp Developer](https://developer.hashicorp.com/terraform/install))
 
-
-### Linux install
+##### Если есть обходы, или блокироваки не касаются: Linux install
 
 ```bash
 # Ubuntu
@@ -12,7 +11,7 @@ sudo apt update && sudo apt install terraform
 
 ```
 
-#### Официальный registry Terraform в России недоступен, поэтому необходимо использование зеркала:
+##### Официальный registry Terraform в России недоступен, необходимо использование зеркала:
 
 По пути `~/` создать файл `.terraformrc`:
 

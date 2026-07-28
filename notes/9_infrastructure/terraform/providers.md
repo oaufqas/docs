@@ -11,3 +11,8 @@
 - **[Yandex cloud](https://yandex.cloud/ru/docs/terraform/resources/kubernetes_cluster)**
 - **[AWS](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)** (vpn)
 - **[Other](https://registry.terraform.io/browse/providers)** (vpn)
+
+---
+
+#### Примеры
+

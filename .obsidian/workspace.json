@@ -29,30 +29,16 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/7_configuration/ansible/vault.md",
+                "file": "notes/10_virtualization/proxmox/pve-cli.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "vault"
-            }
-          },
-          {
-            "id": "355541b774c8ad26",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "notes/8_orchestration/kubernetes/installation.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "installation"
+              "title": "pve-cli"
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -214,34 +200,34 @@
       "bases:Create new base": false
     }
   },
-  "active": "355541b774c8ad26",
+  "active": "31abff219c8fb033",
   "lastOpenFiles": [
-    "notes/1_linux/basic-commands.md",
-    "notes/8_orchestration/kubernetes/cni-plugins.md",
-    "notes/7_configuration/ansible/vault.md",
-    "notes/7_configuration/ansible/modules.md",
-    "notes/7_configuration/ansible/jinja2.md",
-    "notes/7_configuration/ansible/inventory.md",
-    "notes/7_configuration/ansible/basics.md",
-    "notes/7_configuration/best-practices.md",
-    "notes/7_configuration/Teory.md",
-    "notes/8_orchestration/kubernetes/installation.md",
-    "notes/7_configuration/ansible/playbooks.md",
-    "notes/1_linux/user-permissions.md",
-    "notes/1_linux/networking.md",
-    "notes/1_linux/inodes-links.md",
     "notes/10_virtualization/proxmox/vm-management.md",
-    "notes/10_virtualization/proxmox/storage.md",
+    "notes/10_virtualization/proxmox/containers.md",
+    "notes/10_virtualization/proxmox/installation.md",
+    "notes/10_virtualization/proxmox/backup.md",
+    "notes/10_virtualization/proxmox/basics.md",
     "notes/10_virtualization/proxmox/networking.md",
     "notes/10_virtualization/proxmox/pve-cli.md",
-    "notes/10_virtualization/proxmox/installation.md",
-    "notes/10_virtualization/proxmox/containers.md",
-    "notes/10_virtualization/proxmox/basics.md",
-    "notes/10_virtualization/proxmox/backup.md",
-    "notes/14_cryptography/kubernetes-mtls.md",
-    "notes/7_configuration/ansible/roles.md",
-    "notes/7_configuration/ansible/myplaybooks/rent.yml.md",
-    "notes/7_configuration/ansible/installation.md",
+    "notes/10_virtualization/proxmox/storage.md",
+    "notes/9_infrastructure/terraform/providers.md",
+    "notes/9_infrastructure/Teory.md",
+    "notes/9_infrastructure/terraform/hcl-syntax.md",
+    "notes/9_infrastructure/packer/basics.md",
+    "notes/9_infrastructure/terraform/installation.md",
+    "notes/9_infrastructure/terraform/commands.md",
+    "notes/9_infrastructure/terraform/best-practices.md",
+    "notes/9_infrastructure/terraform/examples.md",
+    "notes/9_infrastructure/terraform/modules.md",
+    "notes/9_infrastructure/terraform/workspaces.md",
+    "notes/9_infrastructure/terraform/state.md",
+    "notes/1_linux/file-system.md",
+    "notes/7_configuration/ansible/vault.md",
+    "notes/1_linux/file-descriptors.md",
+    "notes/8_orchestration/kubernetes/installation.md",
+    "notes/1_linux/basic-commands.md",
+    "notes/8_orchestration/kubernetes/cni-plugins.md",
+    "notes/7_configuration/ansible/modules.md",
     "images/Pasted image 20260722235120.png",
     "images/Pasted image 20260721013123.png",
     "notes/14_cryptography",
