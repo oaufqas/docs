@@ -79,3 +79,25 @@ sudo systemctl enable --now qemu-guest-agent
 2) Копировать виртуальную машину с template (Linked, Full), но каждую придется перенастраивать.
 3) Cloud-Init почти тоже самое что и клонирование, но можно менять конфигурацию нужных параметров (сеть, юзеры, днс, ssh) из proxmox, а не в самой ос. Чтобы использовать cloud-init есть несколько способов:
 	- Использование Cloud-Init images, которые можно использовать для proxmox.
+
+```bash
+qm create 110 --name "ubuntu-template" --memory 2048 --cores 1 --net0 virtio,bridge=vmbr0 # Создание оболочки виртуальной машины
+
+qm importdisk 110 /var/lib/vz/template/iso/noble-server-cloudimg-amd64.img local-lvm # Создание диска и путь к образу
+
+qm set 110 --scsihw virtio-scsi-single --scsi0 local-lvm:vm-110-disk-0,discard=on # Прикрепление диска к машине
+
+qm set 110 --ide2 local-lvm:cloudinit # Прикрепление cloud-init диска
+
+qm set 110 --boot c --bootdisk scsi0 # Указание загрузочного диска
+
+qm set 110 --agent enabled=1 # Включение qm агента, работающего в виртуалке
+
+qm resize 110 scsi0 +7,5G # Увеличение размера диска
+
+qm set 110 --ipconfig0 ip=192.168.100.10/24,gw=192.168.100.1 # Настройки сети
+```
+
+Если есть параметры, которые не указываются в cloud-int, можно их задать перед конвертацией машины в template, тогда все клоны будут включать в себя эти изменения. При каждом копировании виртуалки, можно будет задавать уникальные параметры cloud-init. Hostname машины будет браться из названия виртуалки в proxmox.
+
+- Также есть разные скрипты, которые запускаются в консоли самого proxmox, чтобы не переписывать все эти команды. 

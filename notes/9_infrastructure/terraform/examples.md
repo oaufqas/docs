@@ -1,10 +1,12 @@
-#### Развертывание [[architecture|Kubernetes cluster]] с IngressController nginx и cert-manager в [[managed-k8s|Yandex Cloud]] с помощью Terraform
+### Yc-provider & helm
 
-```main.tf
+Настройка провайдеров.
+
+```hcl
 terraform {
-  required_providers {
+  required_providers { # Объявляем провайдеры, которые будем использовать
     yandex = {
-      source = "yandex-cloud/yandex"
+      source = "yandex-cloud/yandex" 
     }
     helm = {
       source = "hashicorp/helm"
@@ -12,7 +14,7 @@ terraform {
   }
 }
 
-provider "yandex" {
+provider "yandex" { # Все данные берутся с веб-панели yandex-cloud
   token     = var.token
   cloud_id  = var.cloud_id
   folder_id = var.folder_id
@@ -21,38 +23,49 @@ provider "yandex" {
 
 provider "helm" {
   kubernetes = {
-    host                   = yandex_kubernetes_cluster.k8s-cluster.master[0].external_v4_address
-    cluster_ca_certificate = yandex_kubernetes_cluster.k8s-cluster.master[0].cluster_ca_certificate
+    host                   = yandex_kubernetes_cluster.k8s-cluster.master[0].external_v4_address # Указываем адрес кластера
+    
+    cluster_ca_certificate = yandex_kubernetes_cluster.k8s-cluster.master[0].cluster_ca_certificate # Указываем сертификат кластера
 
     token = var.token
   }
 }
+```
 
 
+Развертывание [[architecture|Kubernetes cluster]] в [[managed-k8s|Yandex Cloud]] с помощью Terraform.
 
-resource "yandex_vpc_network" "k8s-network" {
+
+```hcl
+resource "yandex_vpc_network" "k8s-network" { # Создаем сеть в яндексе
   name = "k8s-network"
 }
 
-resource "yandex_vpc_address" "ingress-static-ip" {
+resource "yandex_vpc_address" "ingress-static-ip" { # Получаем белый ip для ingress
   name = "ingress-ip"
   external_ipv4_address {
-    zone_id = var.zone
+    zone_id = var.zone # Зоны могут быть A,B,C,D, уточняется в веб-панели
   }
 }
 
-resource "yandex_vpc_subnet" "k8s-subnet" {
+
+# Создаем подсеть ссылаясь на созданную сеть k8s-network
+resource "yandex_vpc_subnet" "k8s-subnet" { 
   name           = "k8s-subnet"
   network_id     = yandex_vpc_network.k8s-network.id
   v4_cidr_blocks = ["192.168.10.0/24"]
   zone           = var.zone
 }
 
-resource "yandex_iam_service_account" "k8s-sa" {
+
+# Создаем сервисный аккаунт в яндексе, который будет устанавливать кластер
+resource "yandex_iam_service_account" "k8s-sa" { 
   name        = "k8s-account"
   description = "Service account for Kubernetes cluster"
 }
 
+
+# Выдаем циклом роли для сервисного аккаунта чтобы были права на создание
 resource "yandex_resourcemanager_folder_iam_member" "k8s-roles" {
   for_each  = toset(["editor", "container-registry.images.puller"])
   folder_id = var.folder_id
@@ -60,6 +73,8 @@ resource "yandex_resourcemanager_folder_iam_member" "k8s-roles" {
   member    = "serviceAccount:${yandex_iam_service_account.k8s-sa.id}"
 }
 
+
+# Создаем кластер
 resource "yandex_kubernetes_cluster" "k8s-cluster" {
   name       = "k8s-cluster"
   network_id = yandex_vpc_network.k8s-network.id
@@ -119,7 +134,13 @@ resource "yandex_kubernetes_node_group" "nodes" {
     }
   }
 }
+```
 
+
+Установка IngressController nginx и cert-manager в готовый кластер с помощью `helm_release`
+
+
+```hcl
 resource "helm_release" "ingress-nginx" {
   name             = "ingress-nginx"
   repository       = "https://kubernetes.github.io/ingress-nginx"
@@ -185,23 +206,11 @@ resource "helm_release" "nfs_server" {
 output "ingress_external_ip" {
   value = yandex_vpc_address.ingress-static-ip.external_ipv4_address[0].address
 }
-
 ```
 
-```variables.tf
-variable "token" {}
-variable "cloud_id" {}
-variable "folder_id" {}
-variable "zone" {}
-```
 
-```terraform.tfvars
-token = ""
-cloud_id = ""
-folder_id = ""
-zone = ""
-```
-### Создание виртуальной машины в yandex cloud
+Создание виртуальной машины в yandex cloud
+
 
 ```hcl
 terraform {
@@ -271,3 +280,174 @@ output "vm_public_ip" {
 }
 
 ```
+
+
+
+---
+
+#### Proxmox provider & local generating file outputs.
+
+Создание тачек для кластера из списка.
+
+```hcl
+locals { # Объявление локальных переменных, карта будущей инфраструктуры
+    k8s_nodes = {
+        "control-plane" = { id = 110, ip = "192.168.100.10/24" }
+        "node-0" = { id = 111, ip = "192.168.100.11/24" }
+        "node-1" = { id = 112, ip = "192.168.100.12/24" }
+        "node-2" = { id = 113, ip = "192.168.100.13/24" }
+    }
+}  
+  
+
+resource "proxmox_virtual_environment_vm" "k8s_cluster" {
+    for_each = local.k8s_nodes # Запускает цикл. Ресурс повторится столько раз, сколько записей в словаре
+    
+    name = each.key # Имя виртуалки в Proxmox станет равна ключу словаря
+    node_name = "pve" # Имя сервера proxmox
+    vm_id = each.value.id # Имя виртуалки
+
+    clone { # Откуда копировать виртуалки, в нашем случае template с id 100
+        vm_id = 100
+    }  
+
+    cpu { # Количество ядер для вируалки
+        cores = 1
+        type = "host"
+    }  
+
+    memory { # Объем памяти для виртуалки
+        dedicated = 2048
+    }  
+
+    network_device { # Выбор сетевой карты 
+        bridge = "vmbr0"
+    }  
+
+    initialization { # Cloud-init параметры
+        ip_config {
+            ipv4 {
+                address = each.value.ip # Берем ipv4 из словаря locals
+                gateway = var.gateway # Шлюз берем из переменных
+            }
+        }  
+
+        dns { # DNS сервера виртуалки берем из переменных (список)
+            servers = var.dns_servers
+        }  
+
+        user_account { # Создание пользователя, пароль, ssh в authorized_keys, можно несколько ключей добавить
+            username = "k8s"
+            password = "k8spasswd"
+            keys = [
+                "${var.ssh_key}"
+            ]
+        }
+    }
+}
+```
+
+Скачивание ISO-образов из интернета напрямую
+
+```hcl
+resource "proxmox_virtual_environment_file" "ubuntu_iso" {
+  content_type = "iso"
+  datastore_id = "local" # Образы ISO всегда хранятся в local
+  node_name    = "pve"
+
+  source_file {
+    url = "https://ubuntu.com" # Главный аргумент, pve скачает образ используя wget
+  }
+}
+
+# proxmox_virtual_environment_file под капотом работает не по API токену подключения (8006 port), а по ssh (22 port), поэтому для работы этого ресурса нужно объявить доп параметры в настройке провайдера:
+ssh { 
+	agent = true 
+	username = "root" 
+	password = psswd # или
+	private_key = file("~/.ssh/id_rsa")
+  }
+```
+
+Динамическое создание дисков в LVM-Thin
+
+```hcl
+resource "proxmox_virtual_environment_disk" "data_disk" {
+  datastore_id = "local-lvm" # Наш пул LVM-Thin
+  node_name    = "pve"
+  size         = 50          # Размер в Гигабайтах
+  interface    = "scsi1"     # Подключаем как быстрый SCSI VirtIO диск
+  vm_id        = 101
+  
+  file_format  = "raw"       # Для LVM-Thin стандарт строго RAW
+}
+```
+
+Создание LXC-контейнеров (`proxmox_virtual_environment_container`)
+
+```hcl
+resource "proxmox_virtual_environment_container" "admin_lxc" {
+  node_name    = "pve"
+  vm_id        = 111
+  unprivileged = true # Включаем безопасный непривилегированный режим, который мы разбирали!
+
+  initialization {
+    hostname = "ansible-bastion"
+    
+    ip_config {
+      ipv4 {
+        address = "192.168.100.111/24"
+        gateway = "192.168.100.1"
+      }
+    }
+  }
+
+  # Указываем, какой CT Template (шаблон корневой файловой системы) распаковать
+  template_file_id = "local:vztmpl/ubuntu-22.04-standard_22.04-1_amd64.tar.zst"
+}
+```
+
+
+Провайдер `local`, ресурс `local_file` со сложной интерполяцией кода для inventory файла (outputs)
+
+
+```hcl
+resource "local_file" "ansible_inventory" {
+  filename = "${path.module}/../ansible-k8s/inventory/machines.ini"
+  
+  content  = <<EOF
+[masters]
+%{ for name, node in local.k8s_nodes ~}
+%{ if name == "control-plane" ~}
+${name} ansible_host=${split("/", node.ip)[0]} ansible_user=${var.user} ansible_sudo_pass=${var.password}
+%{ endif ~}
+%{ endfor ~}
+
+[workers]
+%{ for name, node in local.k8s_nodes ~}
+%{ if name != "control-plane" ~}
+${name} ansible_host=${split("/", node.ip)[0]} ansible_user=${var.user} pod_cidr=10.200.${tonumber(split("-", name)[1])}.0/24 ansible_sudo_pass=${var.password}
+%{ endif ~}
+%{ endfor ~}
+
+[k8s:children]
+masters
+workers
+EOF
+
+  depends_on = [proxmox_virtual_environment_vm.k8s_cluster]
+}
+```
+
+1. **Конструкция `%{ for name, node in local.k8s_nodes ~}` ... `%{ endfor ~}`**  
+    Это встроенный цикл Terraform для генерации строк. Знак тильды `~` на конце тегов критически важен — он приказывает парсеру Terraform съедать (удалять) лишние переносы строк, чтобы ваш `machines.ini` не содержал пустых пробелов и выглядел спартански аккуратно.
+2. **Фильтр условий `%{ if name != "control-plane" ~}`**  
+    Мы в один проход проверяем имя ключа. Если имя не равно мастеру, мы отправляем эту ноду в секцию `[workers]`. Если вам завтра потребуется добавить `node-2`, `node-3` в `locals`, цикл сам подхватит их, и они автоматически допишутся в секцию воркеров.
+3. **Динамический расчет `pod_cidr` на основе имени:**  
+    `10.200.${tonumber(split("-", name)[1])}.0/24`
+    - Функция `split("-", name)` берет имя `node-0` и режет его по дефису, превращая в список `["node", "0"]`.
+    - Конструкция `[1]` забирает второй элемент — индекс `"0"`.
+    - Функция `tonumber(...)` превращает текст `"0"` в честную цифру `0` для работы математики подсетей Кубера.  
+        _В итоге для ноды `node-5` подсеть подов на лету рассчитается как `10.200.5.0/24` полностью автоматически._
+4. **Сжатие IP через `split("/", node.ip)[0]`**  
+    Так как в `locals` мы храним IP с маской подсети для Cloud-Init (`192.168.100.11/24`), для Ansible маска `/24` сломает SSH-подключение. Эта функция режет строку по слэшу и забирает чистый IP-адрес.

@@ -6,13 +6,58 @@
 - **Типы:** Есть официальные (от HashiCorp), партнерские (от самих облаков) и комьюнити-провайдеры (для экзотических сервисов).
 - **Зачем:** Позволяют управлять всем из одного места — от «железа» в облаке до пользователей в GitHub или Cloudflare.
 
-Документация на популярных провайдеров:
+После перехода с одного провайдера на дргугого, начинает казаться что изучаешь язык программирования с нуля, поэтому нужно учить концепции, а не синтаксис: они одинаковы у всех: `resource "type" "name" { parametres }`. Разница только в именах полей, которые нужно подглядывать в документации. Под рукой всегда нужно держать [Terraform Registry](https://registry.terraform.io/) для поиска нужного провайдера.
 
-- **[Yandex cloud](https://yandex.cloud/ru/docs/terraform/resources/kubernetes_cluster)**
-- **[AWS](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)** (vpn)
-- **[Other](https://registry.terraform.io/browse/providers)** (vpn)
+Главные провайдеры, основы которых нужно знать в первую очередь:
+
+- **[Yandex cloud](https://yandex.cloud/ru/docs/terraform/resources/kubernetes_cluster)**, **[AWS](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)** или другое основное облако
+- **[Kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/latest)**, **[Helm_release](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release)** для управления манифестами и чартами внутри кластера.
+- `github` или `gitlab` для управления репозиториями, ключами и правами доступа.
+- `random`, `tls`, `time` для генерации паролей, сертификатов и временных задержек.
 
 ---
 
-#### Примеры
+Мне пока довелось работать с yc-provider, helm-release и proxmox(bpg). При переходе с облачного провайдера (**Cloud-API**) где облако само управляет дисками, сетями и IP, к **Bare-metal API** где нужно вручную управлять ID виртуалок, привязкой к конкретной ноде proxmox, ISO-образами, cloud-init шаблонами, синтаксис не меняется, но меняется физика процессов.
+
+При смене провайдера необходимо первым делом:
+
+1. **Изучить схему авторизации:** Облака используют токены/IAM-роли. Proxmox требует URL ноды, API Token ID (`user@pve!token_name`) и Secret, а также отключение проверки SSL (`insecure = true`), если сертификат самоподписанный.
+2. **Понять логику именования ресурсов:** В облаке не надо думать об ID машины. В Proxmox `vmid` (например, `101`) часто является обязательным или критически важным для импорта.
+
+
+Краткий справочник по провайдерам
+
+1. Proxmox Provider (например, `bpg/proxmox` или `Telmate/proxmox`)
+
+_Основная суть:_ Клонирование из шаблонов (Cloud-Init) или создание ВМ с нуля на конкретных физических серверах.
+
+- `proxmox_virtual_environment_vm` (или `proxmox_vm_qemu`) — создание виртуалки. Здесь важны аргументы: `node_name` (на каком сервере запускать), `vm_id`, `clone.vm_id` (из какого шаблона копировать) и блок `initialization` (настройки Cloud-Init для SSH-ключей и IP).
+- `proxmox_virtual_environment_container` (или `proxmox_lxc`) — создание легких LXC-контейнеров.
+- `proxmox_virtual_environment_file` — загрузка ISO-образов или Cloud-Init шаблонов на хранилище Proxmox.
+
+2. Yandex Cloud Provider (`yandex-cloud/yandex`)
+
+_Основная суть:_ Управление абстрактными виртуальными ресурсами в дата-центрах Яндекса.
+
+- `yandex_compute_instance` — виртуальная машина. Главное: `zone` (ru-central1-a/b/c), `resources` (cores, memory) и `boot_disk`.
+- `yandex_vpc_network` & `yandex_vpc_subnet` — создание изолированной сети и подсетей с автоматическим DHCP.
+- `yandex_iam_service_account` — создание сервисных аккаунтов для прав доступа.
+
+3. Kubernetes Provider (`hashicorp/kubernetes`)
+
+_Основная суть:_ Управление базовыми объектами оркестратора. На вход принимает Kubeconfig.
+
+- `kubernetes_namespace` — изоляция ресурсов. С этого начинается любой деплой.
+- `kubernetes_secret` & `kubernetes_config_map` — передача конфигов и паролей. Помните: Terraform хранит секреты в стейте в **открытом виде**.
+- `kubernetes_manifest` — универсальный ресурс. Позволяет скопировать любой YAML-манифест (включая CRD) «как есть», не переписывая его на HCL.
+
+4. Helm Provider (`hashicorp/helm`)
+
+_Основная суть:_ Управление высокоуровневыми пакетами (чартами) в Kubernetes. Самый лаконичный провайдер.
+
+- `helm_release` — практически единственный ресурс, который вам нужен.
+- _Что помнить:_ Передавайте параметры через блок `set { name = "..."; value = "..." }` или через `values = [ file("values.yaml") ]`. Всегда явно указывайте `depends_on = [kubernetes_namespace.example]`, чтобы Helm не пытался ставить чарт в еще не созданное пространство имен.
+
+
+[[examples|Примеры написанных IaC на terraform]]
 
