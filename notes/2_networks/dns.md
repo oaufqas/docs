@@ -1,11 +1,12 @@
-#### Изменение dns записей локально на пк:
-
-- **Linux**: `/etc/hosts`
-- **Windows**: `C:\Windows\System32\drivers\etc\hosts`
-
 ### DNS (Domain Name System)
 
 Система, преобразующая удобные для человека доменные имена (например, `example.com`) в IP-адреса (`93.184.216.34`). Работает по протоколу UDP (порт 53), в некоторых случаях TCP (для больших ответов).
+
+
+>Изменение dns записей локально на пк:
+
+- **Linux**: `/etc/hosts`
+- **Windows**: `C:\Windows\System32\drivers\etc\hosts`
 
 #### Иерархия DNS:
 
@@ -24,7 +25,8 @@
 6. Запрос к авторитативному серверу, который возвращает IP-адрес.
 7. Ответ возвращается клиенту и кэшируется.
 
-#### Типы DNS-записей
+
+>Типы DNS-записей
 
 - **A** – IPv4-адрес
 - **AAAA** – IPv6-адрес
@@ -35,7 +37,67 @@
 - **PTR** – обратная запись (IP → имя)
 - **SOA** – Start of Authority (параметры зоны)
 
-#### Утилиты для диагностики
+>Утилиты для диагностики
 
 - **[[notes/1_linux/networking#**DNS-запросы (dig, nslookup)**|nslookup]]** – простой запрос
 - **[[notes/1_linux/networking#**DNS-запросы (dig, nslookup)**|dig]]** – подробный вывод
+
+#### Создание своего DNS-резолвера:
+
+
+```bash
+# 1. Устанавливаем dnsmasq
+sudo apt update && sudo apt install -y dnsmasq
+
+# 2. Отключаем дефолтный systemd-resolved, чтобы он не занимал порт 53
+sudo systemctl stop systemd-resolved
+sudo systemctl disable systemd-resolved
+# Удаляем старую системную ссылку на resolv.conf
+sudo rm /etc/resolv.conf
+# Прописываем внешние DNS (например, Яндекс или Google), чтобы сам контейнер видел интернет
+echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
+
+# 3. Настраиваем dnsmasq
+sudo nano /etc/dnsmasq.conf
+```
+
+В файл `/etc/dnsmasq.conf` добавить минимальный конфиг.
+
+```bash
+# Слушать на всех интерфейсах (включая наш IP 192.168.100.5)
+listen-address=127.0.0.1,192.168.100.5
+
+# Локальная доменная зона вашего кластера
+domain=kubernetes.local
+local=/kubernetes.local/
+
+# Если dnsmasq не знает имя, он перенаправит запрос выше (в интернет)
+server=8.8.8.8
+server=1.1.1.1
+
+# Включаем чтение локальных хостов
+expand-hosts
+```
+
+Теперь зашейте карту вашей сети прямо в файл `/etc/hosts` **этого DNS-контейнера**:
+
+```bash
+sudo nano /etc/hosts
+```
+
+Добавьте туда жесткие IP-адреса вашей инфраструктуры:
+
+```text
+192.168.100.10 control-plane control-plane.kubernetes.local
+192.168.100.11 node-0 node-0.kubernetes.local
+192.168.100.12 node-1 node-1.kubernetes.local
+```
+
+Перезапустите службу DNS:
+
+```bash
+sudo systemctl restart dnsmasq
+sudo systemctl enable dnsmasq
+```
+
+_Всё! На порту `192.168.100.5:53` у вас заработал полноценный, сверхбыстрый корпоративный DNS-сервер._

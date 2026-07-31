@@ -386,24 +386,66 @@ resource "proxmox_virtual_environment_disk" "data_disk" {
 Создание LXC-контейнеров (`proxmox_virtual_environment_container`)
 
 ```hcl
-resource "proxmox_virtual_environment_container" "admin_lxc" {
-  node_name    = "pve"
-  vm_id        = 111
-  unprivileged = true # Включаем безопасный непривилегированный режим, который мы разбирали!
+data "proxmox_file" "ubuntu_container_template" {
+    node_name    = "pve"
+    datastore_id = "local"
+    content_type = "vztmpl"
+    file_name    = "ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
 
-  initialization {
-    hostname = "ansible-bastion"
-    
-    ip_config {
-      ipv4 {
-        address = "192.168.100.111/24"
-        gateway = "192.168.100.1"
-      }
-    }
-  }
+}
+  
 
-  # Указываем, какой CT Template (шаблон корневой файловой системы) распаковать
-  template_file_id = "local:vztmpl/ubuntu-22.04-standard_22.04-1_amd64.tar.zst"
+resource "proxmox_virtual_environment_container" "dns-resolver" {
+    node_name = "pve"
+    vm_id = 120
+    unprivileged = true
+
+    features {
+        nesting = true
+    }
+
+    initialization {
+        hostname = "cluster-dns-resolver"
+
+        dns {
+            servers = [ "1.1.1.1", "8.8.8.8" ]
+        }
+
+        ip_config {
+            ipv4 {
+                address = "${var.dns_servers[0]}/24"
+                gateway = var.gateway
+            }
+        }
+
+        user_account {
+            keys = ["${var.ssh_key}"]
+            password = var.password
+        }
+    }
+
+    network_interface {
+        name = "eth0"
+        bridge = "vmbr0"
+    }
+
+    disk {
+        datastore_id = "local-lvm"
+        size         = 6
+    }
+
+    cpu {
+        cores = 1
+    }
+
+    memory {
+        dedicated = 512
+    }
+
+    operating_system {
+        template_file_id = data.proxmox_file.ubuntu_container_template.id
+        type = "ubuntu"
+    }
 }
 ```
 
