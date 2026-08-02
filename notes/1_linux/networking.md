@@ -362,6 +362,15 @@ rsync -avz ./project/ user@server:/backup/project/ # Синхронизиров�
 - `-z` — сжимать при передаче
 ```
 
+Если не заходит по паролю, по руту, какие то другие проблемы с подключением, смотрим в `/etc/ssh/ssh_config ssh_config.d/`, `etc/ssh/sshd_config sshd_config.d/`, ищем параметры `PermitRootLogin yes`, `PasswordAuthentication yes`. Также проблема может быть в **`authorized_keys`** на сервере, там может лежать строка-команда, которая не позволяет пользователю вход. Этот файл нужно просто удалить в таком случае.
+
+```bash
+$ root@node-0:~/.ssh$ cat authorized_keys 
+
+
+# no-port-forwarding,no-agent-forwarding,no-X11-forwarding,command="echo 'Please login as the user \"k8s\" rather than the user \"root\".';echo;sleep 10;exit 142" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOkAicRIO48EPer5OKiozQ9CFDLrPmxPfMpLXMY2zdg5 root@k8s-agent
+```
+
 ---
 
 ##### **`Nmap` (Network Mapper)** — швейцарский нож для сетевого аудита. Позволяет узнать, какие устройства в сети, какие порты открыты и какие сервисы там работают.
