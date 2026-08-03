@@ -16,6 +16,7 @@
 - ### [[iptables|Firewall iptables]]
 - ### [[hardware-virtualization|Hardware, virtualization]]
 - ### [[cgroups-namespaces|Cgroups, namespaces]]
+- ### [[journald-resolved|Journald, resolved]]
 
 #### Основные конфигурационные файлы:
 
