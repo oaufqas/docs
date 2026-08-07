@@ -301,9 +301,9 @@ _(Или сокращенно: `kubectl get cs`). Все строки (scheduler
 
 ```bash
 etcdctl \
-  --cacert={{ pkidir }}/ca.pem \
-  --cert={{ pkidir }}/kubernetes.pem \
-  --key={{ pkidir }}/kubernetes-key.pem \
+  --cacert=ca.pem \
+  --cert=kubernetes.pem \
+  --key=kubernetes-key.pem \
   --endpoints=https://192.168.100.10:2379,https://192.168.100.12:2379 \
   endpoint health
 ```

@@ -485,52 +485,7 @@ subjects:
 
 ![[Pasted image 20260722235120.png]]
 
-**Конфиг файлы**:
-
-`/var/lib/kubelet/kubelet-config.yaml`:
-
-```yaml
-kind: KubeletConfiguration
-apiVersion: kubelet.config.k8s.io/v1beta1
-address: "0.0.0.0"
-authentication:
-  anonymous:
-    enabled: false
-  webhook:
-    enabled: true
-  x509:
-    clientCAFile: "/var/lib/kubelet/ca.pem"
-authorization:
-  mode: Webhook
-cgroupDriver: systemd
-containerRuntimeEndpoint: "unix:///var/run/containerd/containerd.sock"
-enableServer: true
-failSwapOn: false
-maxPods: 32
-memorySwap:
-  swapBehavior: NoSwap
-port: 10250
-resolvConf: "/run/systemd/resolve/resolv.conf"
-registerNode: true
-runtimeRequestTimeout: "15m"
-clusterDNS:
-  - "10.32.0.10"
-clusterDomain: "cluster.local"
-podInfraContainerImage: "registry.k8s.io/pause:3.9"
-tlsCertFile: "/var/lib/kubelet/node-0.pem"
-tlsPrivateKeyFile: "/var/lib/kubelet/node-0-key.pem"
-```
-
-`/var/lib/kube-proxy/kube-proxy-config.yaml`:
-
-```yaml
-kind: KubeProxyConfiguration
-apiVersion: kubeproxy.config.k8s.io/v1alpha1
-clientConnection:
-  kubeconfig: "/var/lib/kube-proxy/kubeconfig"
-mode: "iptables"
-clusterCIDR: "10.200.0.0/16"
-```
+Конфигурационные файлы для настройки сети подов вручную (без cni):
 
 `/etc/cni/net.d/10-bridge.conf`:
 
@@ -562,88 +517,8 @@ clusterCIDR: "10.200.0.0/16"
 }
 ```
 
-`/etc/containerd/config.toml`:
+####  Примеры конфигурационных файлов с объяснениями [[worker-nodes|есть тут]]
 
-```toml
-version = 2
-
-[plugins."io.containerd.grpc.v1.cri"]
-  [plugins."io.containerd.grpc.v1.cri".containerd]
-    snapshotter = "overlayfs"
-    default_runtime_name = "runc"
-  [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
-    runtime_type = "io.containerd.runc.v2"
-  [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
-    SystemdCgroup = true
-[plugins."io.containerd.grpc.v1.cri".cni]
-  bin_dir = "/opt/cni/bin"
-  conf_dir = "/etc/cni/net.d"
-```
-
-
-**Unit файлы (`/etc/systemd/system/`):**
-
-`containerd.service`:
-
-```ini
-[Unit]
-Description=containerd container runtime
-Documentation=https://containerd.io
-After=network.target
-
-[Service]
-ExecStartPre=/sbin/modprobe overlay
-ExecStart=/bin/containerd
-Restart=always
-RestartSec=5
-Delegate=yes
-KillMode=process
-OOMScoreAdjust=-999
-LimitNOFILE=1048576
-LimitNPROC=infinity
-LimitCORE=infinity
-
-[Install]
-WantedBy=multi-user.target
-```
-
-`kubelet.service`:
-
-```ini
-[Unit]
-Description=Kubernetes Kubelet
-Documentation=https://github.com/kubernetes/kubernetes
-After=containerd.service
-Requires=containerd.service
-
-[Service]
-ExecStart=/usr/local/bin/kubelet \
-  --config=/var/lib/kubelet/kubelet-config.yaml \
-  --kubeconfig=/var/lib/kubelet/kubeconfig \
-  --v=2
-Restart=on-failure
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-```
-
-`kube-proxy.service`:
-
-```
-[Unit]
-Description=Kubernetes Kube Proxy
-Documentation=https://github.com/kubernetes/kubernetes
-
-[Service]
-ExecStart=/usr/local/bin/kube-proxy \
-  --config=/var/lib/kube-proxy/kube-proxy-config.yaml
-Restart=on-failure
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-```
 
 Создаем конфиги и сразу переносим на ноды:
 
