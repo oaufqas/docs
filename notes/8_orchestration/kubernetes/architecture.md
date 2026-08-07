@@ -2,7 +2,7 @@ Kubernetes построен по **master-worker** архитектуре. У�
 
 ![[Pasted image 20260321130655.png]]
 
-### Компоненты Control Plane (Master)
+### [[master-nodes|Компоненты Control Plane (Master)]]
 
 |Компонент|Назначение|Порт по умолчанию|
 |---|---|---|
@@ -12,7 +12,7 @@ Kubernetes построен по **master-worker** архитектуре. У�
 |**kube-controller-manager**|Запускает контроллеры (ReplicaSet, Deployment, Endpoints, Node, и др.). Следит за состоянием и приводит его к желаемому.|10252|
 |**cloud-controller-manager**|(Опционально) Интеграция с облачными провайдерами (AWS, GCP, Yandex).||
 
-### Компоненты Worker Node
+### [[worker-nodes|Компоненты Worker Node]]
 
 |Компонент|Назначение|
 |---|---|

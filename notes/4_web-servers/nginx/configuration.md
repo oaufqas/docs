@@ -1,13 +1,16 @@
 #### **Главные конфиги:**
+
 - `/etc/nginx/nginx.conf`
 - `/etc/nginx/conf.d/default.conf`
 
 ##### Директории, в которых по дефолту хранится статические файлы:
+
 - `usr/share/nginx/html`
 - `var/www/html`
 - `etc/nginx/sites-aviables`, `etc/nginx/sites-enabled`
 
 ##### Директории с логами:
+
 - error_log  `/var/log/nginx/error.log`
 - access_log  `/var/log/nginx/access.log`
 
@@ -24,4 +27,4 @@
 - `index index.html index.htm;` — какие файлы искать по умолчанию.
 
 
-**Лучшая практика:** Не пиши всё в `nginx.conf`. Держи каждый сайт в отдельном файле в `/etc/nginx/sites-available/`, а потом создавай симлинк в `sites-enabled/`.
+**Лучшая практика:** не писать всё в `nginx.conf`, а держать каждый сайт в отдельном файле в `/etc/nginx/sites-available/`, а потом создавать симлинк в `sites-enabled/`.
