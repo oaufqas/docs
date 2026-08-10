@@ -29,12 +29,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/4_web-servers/nginx/load-balancing.md",
+                "file": "notes/4_web-servers/haproxy/basics.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "load-balancing"
+              "title": "basics"
             }
           }
         ],
@@ -204,21 +204,21 @@
   },
   "active": "a063ea7d5b85579d",
   "lastOpenFiles": [
-    "notes/4_web-servers/nginx/configuration.md",
-    "notes/4_web-servers/nginx/basics.md",
-    "notes/4_web-servers/nginx/installation.md",
-    "notes/4_web-servers/nginx/load-balancing.md",
-    "notes/4_web-servers/nginx/optimization.md",
+    "notes/4_web-servers/apache/basics.md",
     "notes/4_web-servers/nginx/reverse-proxy.md",
     "notes/4_web-servers/nginx/server-blocks.md",
     "notes/4_web-servers/nginx/ssl.md",
+    "notes/4_web-servers/nginx/optimization_variables.md",
+    "notes/4_web-servers/nginx/load-balancing.md",
+    "notes/4_web-servers/nginx/installation.md",
+    "notes/4_web-servers/nginx/configuration.md",
+    "notes/4_web-servers/haproxy/basics.md",
+    "notes/4_web-servers/nginx/basics.md",
     "notes/13_theory/interview-questions.md",
     "notes/8_orchestration/kubernetes/master-nodes.md",
     "notes/1_linux/inodes-links.md",
     "notes/4_web-servers/Teory.md",
-    "notes/4_web-servers/haproxy/basics.md",
     "notes/10_virtualization/proxmox/pve-cli.md",
-    "notes/4_web-servers/apache/basics.md",
     "notes/8_orchestration/kubernetes/worker-nodes.md",
     "notes/8_orchestration/kubernetes/installation.md",
     "notes/1_linux/journald-resolved.md",
