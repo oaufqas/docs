@@ -13,6 +13,22 @@
 
 Сервис не «привязан» к деплойменту. Он просто сканирует кластер и говорит: «Все поды, на которых есть наклейка `project: rv`, теперь за мной! Я буду слать им трафик».
 
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    app.kubernetes.io/name: proxy # Главное!
+spec:
+  containers:
+  - name: nginx
+    image: nginx:stable
+    ports:
+      - containerPort: 80
+        name: http-web-svc
+```
+
 Если HPA создал 6 подов — сервис сразу видит все 6. Если осталось 2 — он шлет только на эти 2.
 
 При создании сервиса, он просто подхватывает метки указанной сущности (пода/деплоймента) и потом следит за подходящими подами. 
@@ -27,8 +43,9 @@ metadata:
   labels:
     svc: zxc
 spec:
-  clusterIP: None
-  selector:
+  type: NodePort # Опционально
+  clusterIP: None # Опционально
+  selector: # Главное! 
     po: dp
   ports:
   - name: js
@@ -40,6 +57,26 @@ spec:
     port: 80
     targetPort: 80
 ```
+
+Если при совпадении меток на поде и селекторов на сервисе, в endpoints все равно не добавляются адреса подов, проблема скорее всего в том, что под не стартовал (не прошел Readness пробу). В Kubernetes по умолчанию зашито жесткое правило: **если под не прошел Readiness-проверку (не готов принимать бизнес-трафик), куб немедленно удаляет его IP-адрес из Endpoints сервиса**, чтобы живые пользователи не получали ошибку 503.
+
+Но например для настройки vault, сервис нужен до прохождения readness пробы, это просто исправить:
+
+```yaml
+spec: 
+  publishNotReadyAddresses: true # КРИТИЧЕСКАЯ СТРОКА
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: vault
+    component: server
+  ports:
+    - name: vault
+      port: 8200
+      targetPort: 8200
+      nodePort: 31975
+```
+
+Мы можем принудительно приказать Kubernetes что знаем, что Vault еще не готов, но всё равно привяжи его IP к сервису.
 
 ---
 

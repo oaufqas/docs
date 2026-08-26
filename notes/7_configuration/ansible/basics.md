@@ -17,7 +17,7 @@
 **[[notes/7_configuration/ansible/modules|Modules]]** (инструменты Ansible)
 **[[playbooks|Playbooks]]** (сценарии YAML), 
 **[[roles|Roles]]** (структурированные задачи), 
-**[[notes/7_configuration/ansible/vault|Vault]]** (шифрование секретов)
+**[[vault-values|Vault]]** (шифрование секретов)
 **[[jinja2|Jinja2]]** шаблонизатор (динамические файлы). 
 Все это управляет серверами, описывая желаемое состояние, а не просто команды
 
