@@ -754,6 +754,29 @@ sudo ip link delete cni0
 	Теперь этот флаг становится **обязательным**. Kubelet должен четко рапортовать Мастеру, каким диапазоном сети он владеет, чтобы CNI-плагин мог прочитать это из API-сервера и построить правильный тоннель.
 	- _На Воркере 1:_ `podCIDR: "10.200.0.0/24"`
 	- _На Воркере 2:_ `podCIDR: "10.200.1.0/24"`
+
+>**Обновлено**
+
+`podCIDR` настройка в кублете считается legacy, и многие cni плагины не обращают на нее внимания! Настройки сети подов задаются в другом месте: в настройках манифеста calico, нужно создать сущности `IPPool` и привязать каждую к своей ноде с помощю nodeSelector, если не добавлять эти сущности, calico автоматически создаст для подов свою дефолтную сеть.
+
+```yaml
+apiVersion: crd.projectcalico.org/v1
+kind: IPPool
+metadata:
+  name: worker-0-pool
+spec:
+  allowedUses:
+  - Workload
+  - Tunnel
+  cidr: 10.200.0.0/24
+  ipipMode: Always
+  natOutgoing: true
+  nodeSelector: "kubernetes.io/hostname == 'worker-0'"
+  vxlanMode: Never
+```
+
+И соответственно, чтобы поменять подсеть подов для каждой ноды в уже работающем кластетре, нужно `kubectl edit ippool ...`
+
 - **Проверить пути к CNI в `containerd`:**  
 	Убедитесь, что в `/etc/containerd/config.toml` рантайм по-прежнему смотрит в стандартные папки: `bin_dir = "/opt/cni/bin"` и `conf_dir = "/etc/cni/net.d"`. CNI-плагины будут подкладывать свои бинарники именно туда.
 

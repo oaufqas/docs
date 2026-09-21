@@ -29,12 +29,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/7_configuration/ansible/vault-values.md",
+                "file": "notes/1_linux/Teory.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "vault-values"
+              "title": "Teory"
             }
           }
         ],
@@ -97,7 +97,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 217.5
+    "width": 215.5
   },
   "right": {
     "id": "a91bcb6f73bfb764",
@@ -202,34 +202,34 @@
       "bases:Create new base": false
     }
   },
-  "active": "97a38e31c072c182",
+  "active": "a063ea7d5b85579d",
   "lastOpenFiles": [
+    "notes/1_linux/init-process.md",
+    "notes/1_linux/Teory.md",
+    "notes/8_orchestration/kubernetes/cni-plugins.md",
+    "notes/8_orchestration/kubernetes/installation.md",
+    "notes/8_orchestration/kubernetes/master-nodes.md",
+    "notes/1_linux/file-system.md",
+    "notes/8_orchestration/kubernetes/volumes.md",
+    "notes/8_orchestration/kubernetes/vault.md",
+    "notes/1_linux/hardware-virtualization.md",
+    "commands/git-commands.md",
+    "notes/7_configuration/ansible/vault-values.md",
     "notes/8_orchestration/kubernetes/services.md",
     "notes/1_linux/networking.md",
-    "notes/1_linux/file-system.md",
     "notes/1_linux/cgroups-namespaces.md",
     "notes/1_linux/basic-commands.md",
-    "notes/1_linux/Teory.md",
     "notes/1_linux/bash-scripting.md",
     "notes/9_infrastructure/terraform/providers.md",
     "notes/9_infrastructure/terraform/commands.md",
     "notes/9_infrastructure/terraform/best-practices.md",
-    "notes/8_orchestration/kubernetes/master-nodes.md",
-    "notes/8_orchestration/kubernetes/installation.md",
     "notes/8_orchestration/kubernetes/rbac.md",
     "notes/8_orchestration/kubernetes/pods.md",
     "notes/8_orchestration/kubernetes/other-essence.md",
     "notes/8_orchestration/kubernetes/monitoring.md",
-    "notes/8_orchestration/kubernetes/volumes.md",
     "notes/8_orchestration/kubernetes/helm.md",
-    "notes/8_orchestration/kubernetes/vault.md",
     "notes/9_infrastructure/terraform/modules.md",
     "notes/4_web-servers/apache/basics.md",
-    "notes/4_web-servers/nginx/configuration.md",
-    "notes/4_web-servers/nginx/basics.md",
-    "notes/4_web-servers/Teory.md",
-    "notes/4_web-servers/haproxy/basics.md",
-    "notes/1_linux/inodes-links.md",
     "images/Pasted image 20260807031518.png",
     "images/Pasted image 20260722235120.png",
     "images/Pasted image 20260721013123.png",
