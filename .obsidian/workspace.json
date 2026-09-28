@@ -24,17 +24,17 @@
             }
           },
           {
-            "id": "a063ea7d5b85579d",
+            "id": "e24af7d16ad9e241",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/2_networks/dns.md",
+                "file": "notes/1_linux/eBPF.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "dns"
+              "title": "eBPF"
             }
           }
         ],
@@ -72,7 +72,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "ldd",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -202,34 +202,37 @@
       "bases:Create new base": false
     }
   },
-  "active": "a063ea7d5b85579d",
+  "active": "e24af7d16ad9e241",
   "lastOpenFiles": [
-    "notes/8_orchestration/kubernetes/architecture.md",
+    "notes/16_programming/CPP-Links,pointers,structurs.md",
+    "notes/1_linux/eBPF.md",
+    "notes/1_linux/Teory.md",
+    "images/Pasted image 20260927214600.png",
+    "notes/13_theory/interview-questions.md",
+    "README.md",
+    "notes/17_git/Theory.md",
+    "notes/17_git",
+    "notes/1_linux/processes-jobs.md",
+    "notes/1_linux/cgroups-namespaces.md",
+    "notes/1_linux/program-compilation_assembler.md",
+    "notes/16_programming/CMake.md",
+    "notes/16_programming/Theory.md",
+    "notes/16_programming",
+    "images/Pasted image 20260926193234.png",
+    "notes/14_cryptography/Theory.md",
     "notes/2_networks/dns.md",
+    "notes/8_orchestration/kubernetes/architecture.md",
     "notes/1_linux/bash-scripting.md",
     "notes/1_linux/processor-assembler.md",
-    "notes/1_linux/program-compilation_assembler.md",
     "notes/1_linux/processes-job.md",
-    "notes/1_linux/processes-jobs.md",
     "notes/11_monitoring/logging/loki.md",
     "notes/1_linux/virtual-memory.md",
-    "notes/1_linux/Teory.md",
     "notes/1_linux/user-permissions.md",
     "notes/1_linux/threads.md",
     "notes/1_linux/init-process.md",
     "notes/8_orchestration/kubernetes/cni-plugins.md",
     "notes/8_orchestration/kubernetes/installation.md",
     "notes/8_orchestration/kubernetes/master-nodes.md",
-    "notes/1_linux/file-system.md",
-    "notes/8_orchestration/kubernetes/volumes.md",
-    "notes/8_orchestration/kubernetes/vault.md",
-    "notes/1_linux/hardware-virtualization.md",
-    "commands/git-commands.md",
-    "notes/7_configuration/ansible/vault-values.md",
-    "notes/8_orchestration/kubernetes/services.md",
-    "notes/1_linux/networking.md",
-    "notes/1_linux/cgroups-namespaces.md",
-    "notes/1_linux/basic-commands.md",
     "images/Pasted image 20260807031518.png",
     "images/Pasted image 20260722235120.png",
     "images/Pasted image 20260721013123.png",
@@ -239,8 +242,6 @@
     "images/Pasted image 20260623115618.png",
     "images/Pasted image 20260623115559.png",
     "images/Pasted image 20260621142824.png",
-    "images/Pasted image 20260620170432.png",
-    "images/Pasted image 20260620150931.png",
     "notes/9_infrastructure/Untitled.base",
     "notes/6_ci-cd/argo-cd",
     "Без названия",
@@ -248,8 +249,6 @@
     "images",
     "images",
     "Новая папка",
-    "notes/7_configuration/ansible/full_ansible_project/roles/start-containers/tasks/main.yml",
-    "notes/7_configuration/ansible/full_ansible_project/roles/first-setup/tasks/main.yml",
-    "notes/7_configuration/ansible/full_ansible_project/roles/first-setup/templates/nginx.conf.j2"
+    "notes/7_configuration/ansible/full_ansible_project/roles/start-containers/tasks/main.yml"
   ]
 }
