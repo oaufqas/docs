@@ -24,35 +24,17 @@
             }
           },
           {
-            "id": "e24af7d16ad9e241",
+            "id": "8da99fe7ee33f147",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "notes/1_linux/processor-assembler.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "processor-assembler"
-            }
-          },
-          {
-            "id": "c13a93fa3ba59a7f",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "notes/16_programming/CPP-Sockets.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "CPP-Sockets"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -86,7 +68,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "ldd",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -216,39 +198,39 @@
       "bases:Create new base": false
     }
   },
-  "active": "c13a93fa3ba59a7f",
+  "active": "8da99fe7ee33f147",
   "lastOpenFiles": [
-    "notes/2_networks/network-reference-models.md",
+    "notes/16_programming/Theory.md",
+    "README.md",
+    "notes/16_programming/CPP-Basics-datatypes.md",
+    "notes/16_programming/CPP-Links,pointers,structurs.md",
     "notes/16_programming/CPP-Sockets.md",
+    "notes/13_theory/interview-questions.md",
+    "notes/11_monitoring/logging/elastic-stack.md",
+    "notes/11_monitoring/logging/loki.md",
+    "notes/1_linux/program-compilation_assembler.md",
+    "notes/1_linux/processor-assembler.md",
+    "notes/16_programming/CMake.md",
+    "notes/16_programming/CPP-Multithreading.md",
+    "notes/3_containerization/docker/volumes.md",
+    "notes/3_containerization/docker/containers.md",
+    "notes/3_containerization/docker/docker_file.md",
+    "notes/3_containerization/docker/networks.md",
+    "notes/3_containerization/docker/installation.md",
+    "notes/3_containerization/docker/dockerfile-multi-stage.md",
+    "notes/3_containerization/docker/images.md",
+    "notes/3_containerization/docker/docker-compose.md",
+    "notes/3_containerization/docker/security.md",
+    "notes/3_containerization/Teory.md",
+    "notes/2_networks/network-reference-models.md",
     "notes/2_networks/wireshark.md",
     "notes/2_networks/ssl-tls.md",
     "notes/2_networks/tcp-udp.md",
-    "notes/2_networks/network-troubleshooting.md",
-    "notes/2_networks/dns.md",
-    "notes/2_networks/http-https.md",
-    "notes/2_networks/ip-addressing.md",
-    "notes/2_networks/Teory.md",
     "images/Pasted image 20261002015941.png",
-    "notes/1_linux/eBPF.md",
-    "notes/1_linux/processor-assembler.md",
-    "notes/1_linux/Teory.md",
-    "notes/1_linux/program-compilation_assembler.md",
-    "notes/16_programming/CPP-Links,pointers,structurs.md",
     "images/Pasted image 20260927214600.png",
-    "notes/13_theory/interview-questions.md",
-    "README.md",
-    "notes/17_git/Theory.md",
     "notes/17_git",
-    "notes/1_linux/processes-jobs.md",
-    "notes/1_linux/cgroups-namespaces.md",
-    "notes/16_programming/CMake.md",
-    "notes/16_programming/Theory.md",
     "notes/16_programming",
     "images/Pasted image 20260926193234.png",
-    "notes/14_cryptography/Theory.md",
-    "notes/8_orchestration/kubernetes/architecture.md",
-    "notes/1_linux/bash-scripting.md",
-    "notes/1_linux/processes-job.md",
     "images/Pasted image 20260807031518.png",
     "images/Pasted image 20260722235120.png",
     "images/Pasted image 20260721013123.png",
