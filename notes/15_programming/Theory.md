@@ -5,7 +5,7 @@
 [[CPP-Links,pointers,structurs]]
 [[CPP-Sockets]]
 [[CPP-Multithreading]]
-
+[[CPP-Syscalls]]
 #### Компиляция и менеджмент сборки:
 [[CMake]]
 [[program-compilation_assembler]]
