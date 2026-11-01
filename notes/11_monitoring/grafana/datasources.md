@@ -33,26 +33,32 @@
 
 - **CloudWatch** (AWS), **Azure Monitor**, **Google Stackdriver**: Можно мониторить облака напрямую без установки экспортеров.
 
-### Mixed Data Sources (Смешивание)
+#### Mixed Data Sources (Смешивание)
 
 Это «киллер-фича» Grafana. На одной панели (графике) вы можете вывести:
 
 1. Данные из **Prometheus** (загрузка CPU).
 2. Данные из **Loki** (количество ошибок в логах за этот же период).  
     Это позволяет сразу увидеть корреляцию: «Ага, CPU подскочил ровно в тот момент, когда в логах посыпались ошибки БД».
-## Настройка «Data Source as Code»
+    
+### Настройка «Data Source as Code»
 
 Как и дашборды, в нормальном продакшене источники данных не добавляют через меню. Их описывают в **YAML-файлах** в папке `provisioning`.
 
 Пример конфига для Prometheus:
 
+`/etc/grafana/provisioning/datasources/datasource.yml`
+
 ```yaml
 apiVersion: 1
+
 datasources:
   - name: Prometheus
     type: prometheus
+    access: proxy
     url: http://localhost:9090
     isDefault: true
+    editable: true
 ```
 
 Если вы положите такой файл в контейнер с Grafana, она при старте уже будет «знать» про ваш Prometheus.

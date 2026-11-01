@@ -87,7 +87,7 @@ http_requests_total{method="GET", status="200"}
 
 ---
 
-## Основные выражения сбора метрик
+### Основные выражения сбора метрик
 
 В Prometheus, работающем на `http://localhost:9090`. 
 
@@ -168,7 +168,3 @@ sum(rate(container_cpu_usage_seconds_total{namespace="production"}[5m])) by (pod
 sum(container_memory_working_set_bytes{container!=""}) by (container, pod)
 
 ```
-
-
-
----

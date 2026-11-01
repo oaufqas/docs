@@ -1,6 +1,6 @@
 **Dockerfile** — это обычный текстовый файл с инструкциями, по которым Docker автоматически собирает образ. Это «рецепт» вашего приложения: от выбора ОС до запуска кода
 
-## Основные инструкции Dockerfile:
+### Основные инструкции Dockerfile:
 
 - `FROM` -  Задает базовый образ (фундамент).  - `FROM python:3.9-slim`
 - `LABEL` -  Метаданные - `LABEL author=rvlx`
@@ -11,7 +11,6 @@
 - `EXPOSE` - Информирует, какой порт приложение слушает. - `EXPOSE 8080`
 - `VOLUME` - Создает точку монтирования для данных. - `VOLUME /data`
 - `CMD/ENTRYPOINT` - Команда по умолчанию при запуске контейнера. - `CMD ["python", "app.py"]`
-
 
 
 **Разница между ENTRYPOINT и CMD:** Обе команды определяют, что будет запущено при старте контейнера. Но они по-разному работают с аргументами.
@@ -28,20 +27,17 @@
 - Тут ya.ru полностью заменил то, что было в CMD.
 - Итог: Используйте ENTRYPOINT для самой команды, а CMD — для параметров, которые пользователь, скорее всего, захочет поменять
 
+>Для чего указывать **EXPOSE**, если он не открывает порт, а это нужно делать флагом -p при запуске контейнера:
 
-##### Для чего указывать **EXPOSE**, если он не открывает порт, а это нужно делать флагом -p при запуске контейнера:
 1. Документация: Это подсказка для других разработчиков
 2. Если при запуске использовать флаг **-P (заглавная P)**, Docker автоматически пробросит все порты из EXPOSE на случайные свободные порты вашего компьютера.
 3. Внутренние сети: Инструкция помогает некоторым инструментам оркестрации понимать сетевую структуру приложения.
 
-
-
-##### Зачем указывать **VOLUME**, если есть -v?
+>Зачем указывать **VOLUME**, если есть -v?
+>
 1. Защита данных: **Если пользователь забудет указать -v при запуске, Docker все равно создаст для этой папки «анонимный вольюм»**. Данные не будут стерты при удалении контейнера (они останутся в недрах /var/lib/docker/volumes/)
 2. Производительность: Слои overlay2 работают медленнее на запись. Инструкция VOLUME выносит папку за пределы слоев overlay2, что ускоряет работу с файлами (особенно важно для баз данных).
 3. Документация: Это подсказка для других разработчиков
-
-
 ## Пример:
 
 ```yaml
@@ -114,4 +110,136 @@ EXPOSE 3000
 
 # ---------- КОМАНДА ЗАПУСКА ----------
 CMD ["node", "server.js"]
+```
+
+
+---
+
+
+```yml
+
+# БАЗОВЫЙ ОБРАЗ 
+# Используем официальный образ с конкретной версией (не latest!)
+ARG NODE_VERSION=18.17.0
+FROM node:${NODE_VERSION}-alpine AS builder
+
+# МЕТАДАННЫЕ
+LABEL maintainer="your-email@example.com"
+LABEL version="1.0.0"
+LABEL description="Production-ready Node.js application"
+
+# ПЕРЕМЕННЫЕ СБОРКИ 
+# ARG доступны только во время сборки
+ARG APP_USER=nodeuser
+ARG APP_HOME=/app
+ARG NODE_ENV=production
+
+# ENV доступны в контейнере постоянно
+ENV NODE_ENV=${NODE_ENV} \
+    PATH="${APP_HOME}/node_modules/.bin:${PATH}" \
+    # Настройки Node.js
+    NODE_OPTIONS="--max-old-space-size=512" \
+    # Настройки npm
+    npm_config_cache=/tmp/.npm
+
+# СОЗДАНИЕ ПОЛЬЗОВАТЕЛЯ 
+# Лучше не запускать приложения от root
+RUN addgroup -g 1001 -S ${APP_USER} && \
+    adduser -u 1001 -S ${APP_USER} -G ${APP_USER}
+
+# УСТАНОВКА СИСТЕМНЫХ ЗАВИСИМОСТЕЙ
+RUN apk add --no-cache \
+    curl \
+    tzdata \
+    && cp /usr/share/zoneinfo/Europe/Moscow /etc/localtime \
+    && echo "Europe/Moscow" > /etc/timezone
+
+# РАБОЧАЯ ДИРЕКТОРИЯ 
+WORKDIR ${APP_HOME}
+
+# КОПИРОВАНИЕ ЗАВИСИМОСТЕЙ
+# Сначала только package.json для кэширования слоя
+COPY package*.json ./
+COPY yarn.lock* ./
+
+# УСТАНОВКА ЗАВИСИМОСТЕЙ
+RUN npm ci --only=production --no-audit --no-fund && \
+    npm cache clean --force
+
+# КОПИРОВАНИЕ ИСХОДНИКОВ
+COPY . .
+
+# СБОРКА ПРИЛОЖЕНИЯ (если нужно) 
+RUN npm run build
+
+# НАСТРОЙКА ПРАВ
+RUN chown -R ${APP_USER}:${APP_USER} ${APP_HOME}
+
+# ПЕРЕКЛЮЧЕНИЕ НА НЕ-ROOT ПОЛЬЗОВАТЕЛЯ
+USER ${APP_USER}
+
+# HEALTHCHECK 
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
+
+# ПОРТЫ 
+EXPOSE 3000
+
+# КОМАНДА ЗАПУСКА
+CMD ["node", "server.js"]
+```
+
+---
+
+`docker build -t myapp .`
+`docker run -p 8000:8000 myapp`
+
+
+```yml
+FROM python:3.11-slim AS builder
+
+# Устанавливаем системные зависимости (если нужны)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Копируем зависимости
+COPY requirements.txt .
+
+# Создаем виртуальное окружение и устанавливаем зависимости
+RUN python -m venv /venv && \
+    /venv/bin/pip install --no-cache-dir -r requirements.txt
+
+# Финальный образ
+FROM python:3.11-slim
+
+# Копируем виртуальное окружение из builder
+COPY --from=builder /venv /venv
+
+# Добавляем venv в PATH
+ENV PATH="/venv/bin:$PATH"
+
+# Создаем непривилегированного пользователя
+RUN addgroup --system --gid 1001 appgroup && \
+    adduser --system --uid 1001 --gid 1001 appuser
+
+WORKDIR /app
+
+# Копируем код приложения
+COPY --chown=appuser:appgroup . .
+
+# Переключаемся на непривилегированного пользователя
+USER appuser
+
+# Порт приложения
+EXPOSE 8000
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+
+# Запуск
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
 ```

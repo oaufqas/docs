@@ -24,31 +24,17 @@
             }
           },
           {
-            "id": "c466eb6d97c705b6",
+            "id": "ed6d05dfbd406fc0",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/15_programming/ASM-Basics.md",
+                "file": "notes/15_programming/CPP-Basics-OOP.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "ASM-Basics"
-            }
-          },
-          {
-            "id": "1c2aa6536ba442e8",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "notes/1_linux/processor-assembler.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "processor-assembler"
+              "title": "CPP-Basics-OOP"
             }
           }
         ],
@@ -216,39 +202,39 @@
       "bases:Create new base": false
     }
   },
-  "active": "c466eb6d97c705b6",
+  "active": "ed6d05dfbd406fc0",
   "lastOpenFiles": [
-    "notes/1_linux/processor-assembler.md",
-    "notes/15_programming/ASM-Basics.md",
     "notes/1_linux/program-compilation_assembler.md",
-    "notes/1_linux/Teory.md",
-    "notes/1_linux/threads.md",
-    "notes/14_cryptography-cryptocurrency/cryptocurrency/blockchain.md",
-    "notes/14_cryptography-cryptocurrency/cryptocurrency/networks-blck.md",
-    "notes/14_cryptography-cryptocurrency/cryptocurrency/security.md",
-    "notes/14_cryptography-cryptocurrency/cryptocurrency/wallets, crypto-clients.md",
-    "notes/14_cryptography-cryptocurrency/kubernetes-mtls.md",
-    "notes/14_cryptography-cryptocurrency/Theory.md",
+    "notes/15_programming/Theory.md",
+    "notes/15_programming/CPP-Basics-OOP.md",
+    "notes/11_monitoring/grafana/dashboards.md",
+    "notes/11_monitoring/grafana/datasources.md",
+    "notes/11_monitoring/grafana/basics.md",
+    "notes/11_monitoring/grafana/alerts.md",
+    "notes/13_theory/interview-questions.md",
+    "notes/3_containerization/docker/docker_file.md",
+    "notes/3_containerization/docker/containers.md",
+    "notes/3_containerization/docker/docker-compose.md",
+    "notes/3_containerization/docker/dockerfile-multi-stage.md",
+    "notes/3_containerization/docker/images.md",
+    "notes/3_containerization/docker/installation.md",
+    "notes/3_containerization/docker/networks.md",
+    "notes/3_containerization/docker/security.md",
+    "notes/3_containerization/docker/volumes.md",
+    "notes/3_containerization/registry/dockerhub.md",
+    "notes/3_containerization/registry/private-registry.md",
+    "notes/3_containerization/Teory.md",
+    "notes/3_containerization/docker/tamplates/Dockerfile.python.md",
+    "notes/3_containerization/docker/tamplates/Dockerfile.node.md",
+    "notes/3_containerization/docker/tamplates/Dockerfile.multistage.md",
+    "notes/3_containerization/docker/tamplates/docker-compose.yml.md",
+    "notes/11_monitoring/prometheus/basics.md",
+    "notes/15_programming/ASM-Basics.md",
     "notes/14_cryptography-cryptocurrency/cryptocurrency",
     "images/Pasted image 20261029222355.png",
     "images/Pasted image 20261029222052.png",
-    "notes/13_theory/interview-questions.md",
-    "notes/17_ai/Theory.md",
-    "README.md",
-    "notes/15_scripts/deployment-scripts.md",
-    "notes/15_scripts/1_teory.md",
-    "notes/15_scripts/backup-scripts.md",
-    "notes/15_scripts/useful-aliases.md",
-    "notes/15_scripts/monitoring-scripts.md",
-    "notes/15_programming/CPP-Multithreading.md",
     "notes/17_ai",
     "Untitled",
-    "notes/4_web-servers/nginx/configuration.md",
-    "notes/4_web-servers/nginx/basics.md",
-    "notes/1_linux/eBPF.md",
-    "notes/15_programming/CPP-Syscalls.md",
-    "notes/15_programming/CPP-Sockets.md",
-    "notes/4_web-servers/haproxy/basics.md",
     "images/Pasted image 20261002015941.png",
     "images/Pasted image 20260927214600.png",
     "notes/16_git",

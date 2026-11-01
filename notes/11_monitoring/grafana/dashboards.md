@@ -32,3 +32,102 @@
 
 - Дашборд — это по сути огромный **JSON-файл**.
 - Их хранят в Git и раскатывают их через Terraform или Ansible. Если Grafana упадет или её случайно удалят, дашборды легко восстановить из кода.
+
+--- 
+
+### Настройка своих дашбордов и установка
+
+Чтобы при старте сразу появились свои дашборды, нужно указать на них путь в конфигурационном файле (`/etc/grafana/provisioning/dashboards/dashboards.yml`)
+
+```yml
+apiVersion: 1
+
+providers:
+  - name: 'Dashboards'
+    orgId: 1
+    folder: 'Application'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      # Путь внутри контейнера Grafana, где лежат ваши файлы .json
+      path: /etc/grafana/provisioning/dashboards
+```
+
+Файл дашборда (`grafana/provisioning/dashboards/cpp_dashboard.json`)
+
+Обычно этот JSON получают, создав график вручную в Grafana, а затем нажав **Share -> Export -> Save to file**.
+
+Ниже представлен минималистичный рабочий шаблон дашборда. В нем настроены два графика: **RPS** (скорость запросов в секунду на базе `http_requests_total`) и **Температура** (на базе `app_temperature_celsius`).
+
+```json
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "Application Requests Per Second (RPS)",
+      "type": "timeseries",
+      "id": 1,
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "rate(http_requests_total[1m])",
+          "legendFormat": "Method: {{method}}, Status: {{status}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth" },
+          "unit": "reqps"
+        }
+      }
+    },
+    {
+      "title": "Device Temperature",
+      "type": "gauge",
+      "id": 2,
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "app_temperature_celsius",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 60 },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "time": { "from": "now-5m", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "C++ Application Metrics",
+  "uid": "cpp_metrics_dashboard",
+  "version": 1
+}
+```
