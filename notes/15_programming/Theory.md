@@ -7,6 +7,7 @@
 [[CPP-Sockets]]
 [[CPP-Multithreading]]
 [[CPP-Syscalls]]
+[[CPP-filemanagement]]
 
 ASM (NASM):
 [[ASM-Basics]]
