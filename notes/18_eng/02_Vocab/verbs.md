@@ -1,0 +1,29 @@
+Таблица самых частых неправильных глаголов в трех формах (V1-V2-V3).
+
+- **be** — was / were — been _(быть)_
+- **have** — had — had _(иметь)_
+- **do** — did — done _(делать)_
+- **say** — said — said _(сказать)_
+- **go** — went — gone _(идти, ехать)_
+- **get** — got — got _(получать)_
+- **make** — made — made _(делать, создавать)_
+- **know** — knew — known _(знать)_
+- **think** — thought — thought _(думать)_
+- **take** — took — taken _(брать)_
+- **see** — saw — seen _(видеть)_
+- **come** — came — come _(приходить)_
+- **want** — wanted — wanted _(правильный, но очень частый — хотеть)_
+- **look** — looked — looked _(правильный — смотреть)_
+- **give** — gave — given _(давать)_
+- **find** — found — found _(находить)_
+- **tell** — told — told _(рассказывать)_
+- **become** — became — become _(становиться)_
+- **leave** — left — left _(покидать, уезжать)_
+- **feel** — felt — felt _(чувствовать)_
+- **put** — put — put _(класть)_
+- **bring** — brought — brought _(приносить)_
+- **begin** — began — begun _(начинать)_
+- **write** — wrote — written _(писать)_
+- **eat** — ate — eaten _(есть, кушать)_
+- **drink** — drank — drunk _(пить)_
+- **buy** — bought — bought _(покупать)_

@@ -108,7 +108,7 @@ $ git push origin master
 
 Если хотите получить побольше информации об одном из удалённых репозиториев, вы можете использовать команду `git remote show <remote>`. Выполнив эту команду с некоторым именем, например, `origin`, вы получите следующий результат:
 
-```console
+```bash
 $ git remote show origin
 * remote origin
   Fetch URL: https://github.com/schacon/ticgit
@@ -127,7 +127,7 @@ $ git remote show origin
 
 Это был пример для простой ситуации и вы наверняка встречались с чем-то подобным. Однако, если вы используете Git более интенсивно, вы можете увидеть гораздо большее количество информации от `git remote show`:
 
-```console
+```bash
 $ git remote show origin
 * remote origin
   URL: https://github.com/my-org/complex-project
@@ -156,7 +156,7 @@ $ git remote show origin
 
 Для переименования удалённого репозитория можно выполнить `git remote rename`. Например, если вы хотите переименовать `pb` в `paul`, вы можете это сделать при помощи `git remote rename`:
 
-```console
+```bash
 $ git remote rename pb paul
 $ git remote
 origin
@@ -167,7 +167,7 @@ paul
 
 Если по какой-то причине вы хотите удалить удалённый репозиторий — вы сменили сервер или больше не используете определённое зеркало, или кто-то перестал вносить изменения — вы можете использовать `git remote rm`:
 
-```console
+```bash
 $ git remote remove paul
 $ git remote
 origin

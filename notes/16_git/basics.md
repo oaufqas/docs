@@ -107,6 +107,7 @@ $ git commit -m "Story 182: fix benchmarks for speed"
 
 Флаг `-a` при `git commit` позволяет пропустить этап добавления измененных файлов в индекс, он делает это автоматически. Это работает только на уже отслеживаемые файлы.
 
+---
 
 #### Просмотр истории коммитов (`git log`)
 
@@ -208,6 +209,8 @@ d1a43f2 - reset --hard/read-tree --reset -u: remove unmerged new paths
 b0ad11e - pull: allow "git pull origin $something:$current_branch" into an unborn branch
 ```
 
+
+---
 
 ### Операции отмены
 
