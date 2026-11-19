@@ -27,3 +27,4 @@
 - **eat** — ate — eaten _(есть, кушать)_
 - **drink** — drank — drunk _(пить)_
 - **buy** — bought — bought _(покупать)_
+- **understand** — understood — understood (_понимать_)

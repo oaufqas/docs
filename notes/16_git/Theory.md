@@ -149,3 +149,401 @@ Date:   Tue Aug 26 19:48:51 2008 +0800
 
     Signed-off-by: Scott Chacon <schacon@example.com>
 ```
+
+
+---
+
+## Хранилище учётных данных
+
+Если для подключения к удалённым серверам вы используете протокол SSH, то вы можете использовать ключ вместо пароля, что позволит вам безопасно передавать данные без ввода логина и пароля. Однако, это невозможно при использовании HTTP-протоколов — каждое подключение требует пары логин, пароль. Всё ещё сложнее для систем с двухфакторной аутентификацией, когда выражение, которое вы используете в качестве пароля, генерируется случайно и его сложно воспроизвести.
+
+К счастью, в Git есть система управления учётными данными, которая может помочь в этом. В Git «из коробки» есть несколько опций:
+- По умолчанию Git не кеширует учётные данные совсем. Каждое подключение будет запрашивать у вас логин и пароль.
+- В режиме «cache» учётные данные сохраняются в памяти в течение определённого периода времени. Ни один из паролей никогда не сохраняется на диск и все они удаляются из кеша через 15 минут.
+- В режиме «store» учётные данные сохраняются на неограниченное время в открытом виде в файле на диске. Это значит что, до тех пор пока вы не измените пароль к Git-серверу, вам не потребуется больше вводить ваши учётные данные. Недостатком такого подхода является то, что ваш пароль хранится в открытом виде в файле в вашем домашнем каталоге.
+- На случай если вы используете Mac, в Git есть режим «osxkeychain», при использовании которого учётные данные хранятся в защищённом хранилище, привязанному к вашему системному аккаунту. В этом режиме учётные данные сохраняются на диск на неограниченное время, но они шифруются с использованием той же системы, с помощью которой сохраняются HTTPS-сертификаты и автозаполнения для Safari.
+- В случае если вы используете Windows, то можете включить использование «Git Credential Manager» во время установки Git или установить [крайнюю версию GCM](https://github.com/GitCredentialManager/git-credential-manager/releases/latest) как отдельный сервис. Он похож на «osxkeychain», описанный выше, но для управления секретной информацией использует Windows Credential Store. Его так же можно использовать в WSL1 и WSL2.    
+
+Вы можете выбрать один из этих методов, изменив настройки Git:
+
+```bash
+$ git config --global credential.helper cache
+```
+
+Некоторые из этих помощников имеют опции. Помощник «store» может принимать аргумент `--file <path>`, который определяет где будет хранится файл с открытыми учётными данный (по умолчанию используется `~/.git-credentials`). Помощник «cache» принимает опцию `--timeout <seconds>`, которая изменяет промежуток времени, в течение которого демон остаётся запущенным (по умолчанию «900», или 15 минут). Ниже приведён пример как вы можете настроить помощник «store» на использование определённого файла:
+
+```bash
+$ git config --global credential.helper 'store --file ~/.my-credentials'
+```
+
+Git позволяет настраивать сразу несколько помощников. При поиске учётных данных для конкретного сервера, Git будет по порядку запрашивать у них учётные данные и остановится при получении первого ответа. При сохранении учётных данных, Git отправит их **всем** помощникам в списке, которые уже в свою очередь могут решить, что с этими данными делать. Ниже приведено как будет выглядеть `.gitconfig`, если у вас есть файл с учётными данными на флэш-диске, но, на случай его отсутствия, вы хотите дополнительно использовать кеширование в оперативной памяти.
+
+```ini
+[credential]
+    helper = store --file /mnt/thumbdrive/.git-credentials
+    helper = cache --timeout 30000
+```
+
+### Под капотом
+
+Как же это всё работает? Корневой командой Git для системы помощников авторизации является `git credential`, которая принимает команду через аргумент, а все остальные входные данные через стандартный поток ввода.
+
+Возможно, это проще понять на примере. Допустим, помощник авторизации был настроен и в нём сохранены учётные данные для `mygithost`. Ниже приведена рабочая сессия, в которой используется команда «fill», вызываемая Git при попытке найти учётные данные для сервера:
+
+```bash
+$ git credential fill (1)
+protocol=https (2)
+host=mygithost
+(3)
+protocol=https (4)
+host=mygithost
+username=bob
+password=s3cre7
+$ git credential fill (5)
+protocol=https
+host=unknownhost
+
+Username for 'https://unknownhost': bob
+Password for 'https://bob@unknownhost':
+protocol=https
+host=unknownhost
+username=bob
+password=s3cre7
+```
+
+1. Это команда, которая начинает взаимодействие.
+
+2. После этого Git-credential ожидает данные из стандартного потока ввода. Мы передаём ему то, что знаем: протокол и имя сервера.
+
+3. Пустая строка обозначает, что ввод закончен и система управления учётными данными должна ответить, что ей известно.
+
+4. После этого Git-credential выполняет какую-то работу и выводит обнаруженную информацию.
+
+5. Если учётные данные не найдены, Git спрашивает у пользователя логин/пароль, и выводит их обратно в задействованный поток вывода (в данном примере это одна и та же консоль).
+
+
+В действительности, система управления учётными данными вызывает программы, отделённые от самого Git; какие и как зависит в том числе и от настроек `credential.helper`. Существует несколько вариантов вызова:
+
+|Настройки|Поведение|
+|---|---|
+|`foo`|Выполняется `git-credential-foo`|
+|`foo -a --opt=bcd`|Выполняется `git-credential-foo -a --opt=bcd`|
+|`/absolute/path/foo -xyz`|Выполняется `/absolute/path/foo -xyz`|
+|`!f() { echo "password=s3cre7"; }; f`|Код после символа `!` выполняется в шелле|
+
+Итак, помощники, описанные выше на самом деле называются `git-credential-cache`, `git-credential-store` и т. д. и мы можем настроить их на приём аргументов командной строки. Общая форма для этого `git-credential-foo [args] <action>`. Протокол ввода/вывода такой же как и у git-credential, но они используют немного другой набор операций:
+
+- `get` запрос логина и пароля.
+
+- `store` запрос на сохранение учётных данных в памяти помощника.
+
+- `erase` удаляет учётные данные для заданных параметров из памяти используемого помощника.
+
+
+Для операций `store` и `erase` не требуется ответа (в любом случае Git его игнорирует). Однако, для Git очень важно, что помощник ответит на операцию `get`. Если помощник не знает что-либо полезного, он может просто завершить работу не выводя ничего, но если знает — он должен добавить к введённой информации имеющуюся у него информацию. Вывод обрабатывается как набор операций присваивания; выведенные значения заменят те, что Git знал до этого.
+
+Ниже приведён пример, используемый ранее, но вместо git-credential напрямую вызывается git-credential-store:
+
+```bash
+$ git credential-store --file ~/git.store store (1)
+protocol=https
+host=mygithost
+username=bob
+password=s3cre7
+$ git credential-store --file ~/git.store get (2)
+protocol=https
+host=mygithost
+
+username=bob (3)
+password=s3cre7
+```
+
+1. Здесь мы просим `git-credential-store` сохранить некоторые учётные данные: логин «bob» и пароль «s3cre7», которые будут использоваться при доступе к `[https://mygithost](https://mygithost/)`.
+
+2. Теперь мы извлечём эти учётные данные. Мы передаём часть уже известных нам параметров подключения (`[https://mygithost](https://mygithost/)`) и пустую строку.
+
+3. `git-credential-store` возвращает логин и пароль, которые мы сохранили ранее.
+
+
+Ниже приведено содержимое файла `~/git.store`:
+
+```bash
+https://bob:s3cre7@mygithost
+```
+
+Это просто набор строк, каждая из которых содержит URL, включающий в себя учётные данные. Помощники `osxkeychain` и `wincred` используют форматы, лежащие в основе их хранилищ, а `cache` использует его собственный формат хранения во внутренней памяти (который другие процессы прочитать не могут).
+
+
+---
+
+### Подпись
+
+Благодаря шифрованию система Git является безопасной, но полностью она не защищена. На случай, если вы берёте у кого-то в интернете результаты его работы и хотите проверить, что коммиты действительно получены из доверенного источника, в Git есть несколько способов подписать и проверить исходники, используя GPG.
+
+
+Во-первых, если вы хотите что-либо подписать, вам необходим настроенный GPG и персональный ключ.
+
+```bash
+$ gpg --list-keys
+/Users/schacon/.gnupg/pubring.gpg
+---------------------------------
+pub   2048R/0A46826A 2014-06-04
+uid                  Scott Chacon (Git signing key) <schacon@gmail.com>
+sub   2048R/874529A9 2014-06-04
+```
+
+Если у вас нет ключа, то можете сгенерировать его командой `gpg --gen-key`.
+
+```bash
+$ gpg --gen-key
+```
+
+Если у вас есть приватный ключ для подписи, вы можете настроить Git так, чтобы этот ключ использовался для подписи, установив значение параметра `user.signingkey`.
+
+```bash
+$ git config --global user.signingkey 0A46826A
+```
+
+Теперь, если вы захотите, Git будет по умолчанию использовать этот ключ для подписи тегов и коммитов.
+
+### Подпись тегов
+
+Если вы настроили приватный ключ GPG, то можете использовать его для подписи новых тегов. Для этого вы должны использовать опцию `-s` вместо `-a`:
+
+```bash
+$ git tag -s v1.5 -m 'my signed 1.5 tag'
+
+You need a passphrase to unlock the secret key for
+user: "Ben Straub <ben@straub.cc>"
+2048-bit RSA key, ID 800430EB, created 2014-05-04
+```
+
+Если теперь для этого тега вы выполните `git show`, то увидите прикреплённую к нему свою GPG подпись:
+
+```console
+$ git show v1.5
+tag v1.5
+Tagger: Ben Straub <ben@straub.cc>
+Date:   Sat May 3 20:29:41 2014 -0700
+
+my signed 1.5 tag
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQEcBAABAgAGBQJTZbQlAAoJEF0+sviABDDrZbQH/09PfE51KPVPlanr6q1v4/Ut
+LQxfojUWiLQdg2ESJItkcuweYg+kc3HCyFejeDIBw9dpXt00rY26p05qrpnG+85b
+hM1/PswpPLuBSr+oCIDj5GMC2r2iEKsfv2fJbNW8iWAXVLoWZRF8B0MfqX/YTMbm
+ecorc4iXzQu7tupRihslbNkfvfciMnSDeSvzCpWAHl7h8Wj6hhqePmLm9lAYqnKp
+8S5B/1SSQuEAjRZgI4IexpZoeKGVDptPHxLLS38fozsyi0QyDyzEgJxcJQVMXxVi
+RUysgqjcpT8+iQM1PblGfHR4XAhuOqN5Fx06PSaFZhqvWFezJ28/CLyX5q+oIVk=
+=EFTF
+-----END PGP SIGNATURE-----
+
+commit ca82a6dff817ec66f44342007202690a93763949
+Author: Scott Chacon <schacon@gee-mail.com>
+Date:   Mon Mar 17 21:52:11 2008 -0700
+
+    Change version number
+```
+
+### Проверка тегов
+
+Для проверки подписанного тега вы можете воспользоваться командой `git tag -v [tag-name]`. Она использует GPG для проверки подписи. Чтобы всё это правильно работало нужно, чтобы публичный ключ автора присутствовал в вашем хранилище ключей:
+
+```bash
+$ git tag -v v1.4.2.1
+object 883653babd8ee7ea23e6a5c392bb739348b1eb61
+type commit
+tag v1.4.2.1
+tagger Junio C Hamano <junkio@cox.net> 1158138501 -0700
+
+GIT 1.4.2.1
+
+Minor fixes since 1.4.2, including git-mv and git-http with alternates.
+gpg: Signature made Wed Sep 13 02:08:25 2006 PDT using DSA key ID F3119B9A
+gpg: Good signature from "Junio C Hamano <junkio@cox.net>"
+gpg:                 aka "[jpeg image of size 1513]"
+Primary key fingerprint: 3565 2A26 2040 E066 C9A7  4A7D C0C6 D9A4 F311 9B9A
+```
+
+Если у вас отсутствует публичный ключ автора, вы увидите что-то подобное:
+
+```bash
+gpg: Signature made Wed Sep 13 02:08:25 2006 PDT using DSA key ID F3119B9A
+gpg: Can't check signature: public key not found
+error: could not verify the tag 'v1.4.2.1'
+```
+
+### Подпись коммитов
+
+В новых версиях Git (начиная с v1.7.9), вы также можете подписывать отдельные коммиты. Если вам нужно подписывать непосредственно сами коммиты, а не теги, вы можете передать команде `git commit` опцию `-S`.
+
+```bash
+$ git commit -a -S -m 'Signed commit'
+
+You need a passphrase to unlock the secret key for
+user: "Scott Chacon (Git signing key) <schacon@gmail.com>"
+2048-bit RSA key, ID 0A46826A, created 2014-06-04
+
+[master 5c3386c] Signed commit
+ 4 files changed, 4 insertions(+), 24 deletions(-)
+ rewrite Rakefile (100%)
+ create mode 100644 lib/git.rb
+```
+
+Для просмотра и проверки таких подписей у команды `git log` есть параметр `--show-signature`.
+
+```bash
+$ git log --show-signature -1
+commit 5c3386cf54bba0a33a32da706aa52bc0155503c2
+gpg: Signature made Wed Jun  4 19:49:17 2014 PDT using RSA key ID 0A46826A
+gpg: Good signature from "Scott Chacon (Git signing key) <schacon@gmail.com>"
+Author: Scott Chacon <schacon@gmail.com>
+Date:   Wed Jun 4 19:49:17 2014 -0700
+
+    Signed commit
+```
+
+Также вы можете, используя формат с `%G?`, настроить `git log` так, чтобы он проверял и отображал любую обнаруженную подпись.
+
+```bash
+$ git log --pretty="format:%h %G? %aN  %s"
+
+5c3386c G Scott Chacon  Signed commit
+ca82a6d N Scott Chacon  Change the version number
+085bb3b N Scott Chacon  Remove unnecessary test code
+a11bef0 N Scott Chacon  Initial commit
+```
+
+В данном примере видно, что только последний коммит корректно подписан, а все предыдущие нет.
+
+В Git, начиная с версии 1.8.3, команды `git merge` и `git pull` с помощью опции `--verify-signatures` можно заставить проверять и отклонять слияния, если коммит не содержит доверенной GPG подписи.
+
+Если вы воспользуетесь этой опцией при слиянии с веткой, которая содержит неподписанные или некорректно подписанные коммиты, то слияние завершится ошибкой.
+
+```bash
+$ git merge --verify-signatures non-verify
+fatal: Commit ab06180 does not have a GPG signature.
+```
+
+Если сливаемая ветка содержит только корректно подписанные коммиты, команда слияние сначала покажет все проверенные ей подписи, а затем выполнит само слияние.
+
+```bash
+$ git merge --verify-signatures signed-branch
+Commit 13ad65e has a good GPG signature by Scott Chacon (Git signing key) <schacon@gmail.com>
+Updating 5c3386c..13ad65e
+Fast-forward
+ README | 2 ++
+ 1 file changed, 2 insertions(+)
+```
+
+Также с командой `git merge` вы можете использовать опцию `-S`, в этом случае полученный в результате слияния коммит будет подписан. В следующем примере выполняется и проверка каждого коммита сливаемой ветки, и подпись полученного в результате слияния коммита.
+
+```bash
+$ git merge --verify-signatures -S  signed-branch
+Commit 13ad65e has a good GPG signature by Scott Chacon (Git signing key) <schacon@gmail.com>
+
+You need a passphrase to unlock the secret key for
+user: "Scott Chacon (Git signing key) <schacon@gmail.com>"
+2048-bit RSA key, ID 0A46826A, created 2014-06-04
+
+Merge made by the 'recursive' strategy.
+ README | 2 ++
+ 1 file changed, 2 insertions(+)
+```
+
+
+Конечно, подписывать теги и коммиты это хорошая идея, но если вы решите воспользоваться ей в вашем обычном рабочем процессе, то должны удостовериться, что все в вашей команде понимают, как выполнять подпись. Если этого не сделать, то в итоге вам придётся потратить много времени, объясняя коллегами, как перезаписать их коммиты подписанными версиями. Удостоверьтесь, что вы разбираетесь в GPG и преимуществах, которые несут подписи, перед тем как использовать их как часть вашего рабочего процесса.
+
+---
+
+### Восстановление данных
+
+В какой-то момент при работе с Git вы можете нечаянно потерять коммит. Как правило, такое случается, когда вы удаляете ветку, в которой находились некоторые наработки, а потом оказывается, что они всё-таки были нужными; либо вы выполнили `git reset --hard`, тем самым отказавшись от коммитов, которые затем понадобились. Как же в таком случае вернуть свои коммиты обратно?
+
+Ниже приведён пример, в котором мы сбрасываем ветку `master` с потерей данных до более раннего состояния, а затем восстанавливаем потерянные коммиты. Для начала, давайте посмотрим, как сейчас выглядит история изменений:
+
+```bash
+$ git log --pretty=oneline
+ab1afef80fac8e34258ff41fc1b867c702daa24b Modify repo.rb a bit
+484a59275031909e19aadb7c92262719cfcdf19a Create repo.rb
+1a410efbd13591db07496601ebc7a059dd55cfe9 Third commit
+cac0cab538b970a37ea1e769cbbde608743bc96d Second commit
+fdf4fc3344e67ab068f836878b6c4951e3b15f3d First commit
+```
+
+Теперь сбросим ветку `master` на третий коммит:
+
+```bash
+$ git reset --hard 1a410efbd13591db07496601ebc7a059dd55cfe9
+HEAD is now at 1a410ef Third commit
+$ git log --pretty=oneline
+1a410efbd13591db07496601ebc7a059dd55cfe9 Third commit
+cac0cab538b970a37ea1e769cbbde608743bc96d Second commit
+fdf4fc3344e67ab068f836878b6c4951e3b15f3d First commit
+```
+
+Итак, теперь два последних коммита по-настоящему потеряны — они не достижимы ни из одной ветки. Необходимо найти SHA-1 хеш последнего коммита и создать ветку, указывающую на него. Сложность в том, чтобы узнать этот самый SHA-1, ведь вряд ли вы его запомнили, да?
+
+Зачастую самый быстрый способ — использование команды `git reflog`. Дело в том, что во время вашей работы Git записывает все изменения HEAD. Каждый раз при переключении веток и коммитов изменений, добавляется запись в reflog. reflog также обновляется командой `git update-ref` — это, кстати, хорошая причина использовать именно эту команду, а не вручную записывать SHA-1 в ref-файлы. Вы можете посмотреть где находился указатель HEAD в любой момент времени, запустив `git reflog`:
+
+```bash
+$ git reflog
+1a410ef HEAD@{0}: reset: moving to 1a410ef
+ab1afef HEAD@{1}: commit: Modify repo.rb a bit
+484a592 HEAD@{2}: commit: Create repo.rb
+```
+
+Здесь мы видим два коммита, на которые когда-то указывал HEAD, однако информации не так уж и много. Для получения информации в более удобном виде, можно воспользоваться командой `git log -g`, которая выведет лог записей из reflog в привычном формате:
+
+```bash
+$ git log -g
+commit 1a410efbd13591db07496601ebc7a059dd55cfe9
+Reflog: HEAD@{0} (Scott Chacon <schacon@gmail.com>)
+Reflog message: updating HEAD
+Author: Scott Chacon <schacon@gmail.com>
+Date:   Fri May 22 18:22:37 2009 -0700
+
+		Third commit
+
+commit ab1afef80fac8e34258ff41fc1b867c702daa24b
+Reflog: HEAD@{1} (Scott Chacon <schacon@gmail.com>)
+Reflog message: updating HEAD
+Author: Scott Chacon <schacon@gmail.com>
+Date:   Fri May 22 18:15:24 2009 -0700
+
+       Modify repo.rb a bit
+```
+
+Похоже, что последний коммит — это и есть тот, который мы потеряли; его можно восстановить, создав новую ветку, указывающую на него. Например, создадим новую ветку с именем `recover-branch`, указывающую на этот коммит (`ab1afef`):
+
+```bash
+$ git branch recover-branch ab1afef
+$ git log --pretty=oneline recover-branch
+ab1afef80fac8e34258ff41fc1b867c702daa24b Modify repo.rb a bit
+484a59275031909e19aadb7c92262719cfcdf19a Create repo.rb
+1a410efbd13591db07496601ebc7a059dd55cfe9 Third commit
+cac0cab538b970a37ea1e769cbbde608743bc96d Second commit
+fdf4fc3344e67ab068f836878b6c4951e3b15f3d First commit
+```
+
+Отлично — теперь у нас есть ветка `recover-branch`, указывающая туда, куда ранее указывала ветка `master`, тем самым делая потерянные коммиты вновь доступными. Теперь предположим, что потерянные изменения отсутствуют в reflog — для симуляции такого состояния удалим восстановленную ветку и очистим reflog.
+
+```bash
+$ git branch -D recover-branch
+$ rm -Rf .git/logs/
+```
+
+В этом случае два первых коммита недоступны ниоткуда. Так как данные reflog хранятся в каталоге `.git/logs/`, которую мы только что удалили, то теперь у нас нет reflog. Как теперь восстановить коммиты? Один из вариантов — использование утилиты `git fsck`, проверяющую внутреннюю базу данных на целостность. Если выполнить её с ключом `--full`, будут показаны все объекты, недостижимые из других объектов:
+
+```bash
+$ git fsck --full
+Checking object directories: 100% (256/256), done.
+Checking objects: 100% (18/18), done.
+dangling blob d670460b4b4aece5915caf5c68d12f560a9fe3e4
+dangling commit ab1afef80fac8e34258ff41fc1b867c702daa24b
+dangling tree aea790b9a58f6cf6f2804eeac9f0abbe9631e4c9
+dangling blob 7108f7ecb345ee9d0084193f147cdad4d2998293
+```
+
+В нашем случае потерянный коммит указан после слов «dangling commit» («висячий коммит»). Его можно восстановить аналогичным образом, создав новую ветку, указывающую на этот SHA-1.
