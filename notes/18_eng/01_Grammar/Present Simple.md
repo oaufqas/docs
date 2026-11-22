@@ -10,6 +10,8 @@ _The train **leaves** at 7 o'clock._ (Поезд отходит в семь ча
 _She **wants** to be a doctor._ (Она хочет быть врачом)
 _We **deploy** every Friday._ (Мы деплоим каждую пятницу.)
 _What **do** you **do**_ (Чем ты занимаешься)
+_My brother **usually gets** up at 7 AM on weekdays_ (Мой брат обычно встает в 7 утра по будням)
+_My friend **doesn't like** coffee, he **always drinks** green tea._ (Мой друг не любит кофе, он постоянно пьет зеленый чай)
 
 ### Образование времени
 
@@ -47,6 +49,7 @@ _What **do** you **do**_ (Чем ты занимаешься)
 - _rarely / seldom_ (редко)
 - _never_ (никогда)
 - _every day / week / year_ (каждый день / неделю / год)
+- _forever_ (вечно)
 
 
 Отличия от [[Present Continuous]]

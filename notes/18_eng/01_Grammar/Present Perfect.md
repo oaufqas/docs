@@ -10,6 +10,9 @@ _Look! I **have bought** a new dress._ (Смотри! Я купила новое
 _I **have never eaten** sushi._ (Я никогда в жизни не ел суши).
 _I **have drunk** three cups of coffee today._ (Я выпил три чашки кофе сегодня — день еще не закончился, возможно, выпью еще).
 _We **have lived** here for five years._ (Мы живем здесь уже пять лет — и продолжаем жить).
+_I **have never been** to Japan, but i really want to go there_. (Я никогда не был в японии, но очень  хочу туда поехать)
+_She **has just left** the office, you **were** too late_ (Она только что ушла из офиса, ты опоздал)
+_We **have known** each other **since** we were at school_.  (Мы знакомы ещё со школьных времён)
 
 ### Образование времени
 
@@ -47,3 +50,12 @@ _We **have lived** here for five years._ (Мы живем здесь уже пя
 |**Пример 3**|_I **have written** two emails this morning._  <br>(Сейчас еще утро, период не закончен).|_I **wrote** two emails this morning._  <br>(Сейчас уже вечер, утро закончилось).|
 
 **Важное правило:** В Present Perfect **запрещено** использовать слова, указывающие на законченное прошлое (_yesterday, two days ago, last year, in 2020_). Как только в предложении появляется ответ на вопрос **«Когда?»**, время автоматически меняется на **Past Simple**.
+
+
+---
+
+#### Ошибки и объяснения
+
+Mark ==🔴lived== in London **for** five years, and he still lives there. — нужно обращать внимание на `for`. Это указывает на действие, которое началось в прошлом и продолжается сейчас. Форма past simple `lived` означала бы, что он больше там не живёт. Правильный вариант ==🟢has lived==
+
+She ==🔴didn't go== to the gym this week, and the week is not over yet. — Если неделя ещё продолжается (это четко сказано во второй части предложения), мы не используем форму для полностью закрытого прошлого. Правильный вариант ==🟢hasn't been==

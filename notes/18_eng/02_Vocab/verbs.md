@@ -28,3 +28,6 @@
 - **drink** — drank — drunk _(пить)_
 - **buy** — bought — bought _(покупать)_
 - **understand** — understood — understood (_понимать_)
+- **read** — read — read (_читать_)
+- **lose** — lost — lost (_терять_)
+- **spend** — spent — spent (_тратить, проводить время_)

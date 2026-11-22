@@ -10,6 +10,7 @@ _We **are meeting** our friends tonight._ (Мы встречаемся с дру
 _He **is always losing** his keys!_ (Он вечно теряет свои ключи).
 _I **am debugging** this error right now._ (Я сейчас отлаживаю эту ошибку.)
 _What **are** you **doing**?_ (Что ты делаешь?)
+_He **is always leaving** his dirty socks on the floor!_ (Он постоянно оставляет свои грязные носки на полу)
 
 ### Образование времени
 

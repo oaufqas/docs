@@ -38,4 +38,4 @@
 | handle                 | Ручка/Обработчик              | _Handle an error_ (Обрабатывать ошибку)                                          |
 | raise                  | Поднимать                     | _Raise an exception_ (Выбросить исключение), _Raise a question_ (Поднять вопрос) |
 | vulnerability          | Уязвимость                    | _We found a new vulnerability_ (Мы нашли новую уязвимость)                       |
-
+| detached               | Отстраненный/Отделенный       | Detached HEAD (Отделенная голова)                                                |
